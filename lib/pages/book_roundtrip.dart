@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/book_oneway.dart';
 import 'package:ticketing_flutter/pages/book_multicity.dart';
+import 'package:ticketing_flutter/pages/roundtrip_flight.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
@@ -343,7 +344,10 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            _navigateToPage(
+                              "Box 9",
+                              const RoundtripFlightsPage(),
+                            );
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);

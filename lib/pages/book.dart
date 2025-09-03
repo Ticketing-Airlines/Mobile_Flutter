@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/book_oneway.dart';
 import 'package:ticketing_flutter/pages/book_roundtrip.dart';
 import 'package:ticketing_flutter/pages/book_multicity.dart';
+import 'package:ticketing_flutter/pages/search_flight.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
@@ -349,7 +350,7 @@ class _Book extends State<Book> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            _navigateToPage("Box 9", const SearchFlightsPage());
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
