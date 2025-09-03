@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/book_oneway.dart';
 import 'package:ticketing_flutter/pages/book_multicity.dart';
 
+const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
+
 class BookRoundtrip extends StatefulWidget {
   const BookRoundtrip({super.key});
 
@@ -10,17 +12,127 @@ class BookRoundtrip extends StatefulWidget {
 }
 
 class _BookRoundtrip extends State<BookRoundtrip> {
-  // Controllers for user input boxes
   final TextEditingController box4Controller = TextEditingController();
   final TextEditingController box5Controller = TextEditingController();
   final TextEditingController box6Controller = TextEditingController();
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
 
-  bool _isSearchPressed = false; // 🔹 Track button press state
+  int _adults = 1;
+  int _children = 0;
+  int _infants = 0;
+  String _selectedClass = "Economy";
+
+  bool _isSearchPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    box7Controller.text = "${_adults + _children + _infants} Passengers";
+    box8Controller.text = _selectedClass;
+  }
 
   void _navigateToPage(String boxName, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  }
+
+  void _showPassengerSelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildPassengerRow("Adults", _adults, (val) {
+                    setState(() => _adults += val);
+                  }, min: 1),
+                  const Divider(),
+                  _buildPassengerRow("Children", _children, (val) {
+                    setState(() => _children += val);
+                  }),
+                  const Divider(),
+                  _buildPassengerRow("Infants", _infants, (val) {
+                    setState(() => _infants += val);
+                  }),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      final total = _adults + _children + _infants;
+                      box7Controller.text = "$total Passengers";
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Done'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showClassSelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _buildClassOption("Economy"),
+              _buildClassOption("Business"),
+              _buildClassOption("First Class"),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPassengerRow(
+    String type,
+    int count,
+    Function(int) onUpdate, {
+    int min = 0,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(type, style: const TextStyle(fontSize: 16)),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline),
+              onPressed: count > min ? () => onUpdate(-1) : null,
+            ),
+            Text(count.toString(), style: const TextStyle(fontSize: 16)),
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              onPressed: () => onUpdate(1),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClassOption(String className) {
+    return ListTile(
+      title: Text(className),
+      onTap: () {
+        setState(() {
+          _selectedClass = className;
+          box8Controller.text = _selectedClass;
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 
   @override
@@ -44,8 +156,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
+              leading: const Icon(Icons.flight),
+              title: const Text('Book'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -54,8 +166,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.contact_mail),
-              title: const Text('Contact'),
+              leading: const Icon(Icons.manage_accounts),
+              title: const Text('Manage'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -65,11 +177,41 @@ class _BookRoundtrip extends State<BookRoundtrip> {
             ),
             ListTile(
               leading: const Icon(Icons.info),
-              title: const Text('About'),
+              title: const Text('Travel Info'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Navigating to About")),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.explore),
+              title: const Text('Explore'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Navigating to Home")),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('About'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Navigating to Home")),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text('Login'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Navigating to Home")),
                 );
               },
             ),
@@ -147,60 +289,36 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // First row of 3 clickable boxes
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
                               onTap: () =>
                                   _navigateToPage("Box 1", const BookOneway()),
-                              child: buildClickableBox(
-                                "One-way",
-                                Colors.blue.shade200,
-                              ),
+                              child: buildClickableBox("One-Way"),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                // Do nothing because we are already on Multi-City page
-                              },
-                              child: buildClickableBox(
-                                "Roundtrip",
-                                const Color.fromARGB(
-                                  255,
-                                  68,
-                                  138,
-                                  255,
-                                ), // highlight it
-                              ),
-                            ),
+                            buildClickableBox("Roundtrip", isSelected: true),
+
                             GestureDetector(
                               onTap: () => _navigateToPage(
                                 "Box 3",
                                 const BookMulticity(),
                               ),
-                              child: buildClickableBox(
-                                "Multi-City",
-                                Colors.blue.shade200,
-                              ),
+                              child: buildClickableBox("Multi-City"),
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
-
-                        // Box 4, 5, 6 stacked vertically (user input)
                         Column(
                           children: [
-                            buildInputBox("From", box4Controller),
+                            buildAutocompleteField("From", box4Controller),
                             const SizedBox(height: 12),
-                            buildInputBox("To", box5Controller),
+                            buildAutocompleteField("To", box5Controller),
                             const SizedBox(height: 12),
-                            buildInputBox("Departure", box6Controller),
+                            buildDatePickerField("Departure", box6Controller),
                           ],
                         ),
-
                         const SizedBox(height: 12),
-
-                        // Row with Box 7 & 8 (user input)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -208,14 +326,17 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                               "Passengers",
                               box7Controller,
                               width: 140,
+                              readOnly: true,
                             ),
-                            buildInputBox("Class", box8Controller, width: 140),
+                            buildInputBox(
+                              "Class",
+                              box8Controller,
+                              width: 140,
+                              readOnly: true,
+                            ),
                           ],
                         ),
-
                         const SizedBox(height: 20),
-
-                        // Box 9 clickable (Search Flights)
                         GestureDetector(
                           onTapDown: (_) {
                             setState(() => _isSearchPressed = true);
@@ -233,15 +354,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                             height: 70,
                             decoration: BoxDecoration(
                               color: _isSearchPressed
-                                  ? Colors
-                                        .blue
-                                        .shade900 // Pressed color
-                                  : const Color.fromARGB(
-                                      255,
-                                      68,
-                                      138,
-                                      255,
-                                    ), // Default color
+                                  ? Colors.blue.shade900
+                                  : const Color.fromARGB(255, 68, 138, 255),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -275,13 +389,51 @@ class _BookRoundtrip extends State<BookRoundtrip> {
     );
   }
 
-  // Reusable clickable box
-  Widget buildClickableBox(String label, Color color) {
+  Widget buildAutocompleteField(String hint, TextEditingController controller) {
+    return Container(
+      width: 300,
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) {
+            return const Iterable<String>.empty();
+          }
+          return countries.where(
+            (country) => country.toLowerCase().contains(
+              textEditingValue.text.toLowerCase(),
+            ),
+          );
+        },
+        onSelected: (String selection) {
+          controller.text = selection;
+        },
+        fieldViewBuilder:
+            (context, textController, focusNode, onFieldSubmitted) {
+              return TextField(
+                controller: textController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  border: InputBorder.none,
+                ),
+              );
+            },
+      ),
+    );
+  }
+
+  Widget buildClickableBox(String label, {bool isSelected = false}) {
     return Container(
       width: 93,
       height: 50,
       decoration: BoxDecoration(
-        color: color,
+        color: isSelected ? Colors.blue : Colors.blue.shade200,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -304,12 +456,43 @@ class _BookRoundtrip extends State<BookRoundtrip> {
     );
   }
 
-  // Reusable input box widget
   Widget buildInputBox(
     String hint,
     TextEditingController controller, {
     double width = 300,
+    bool readOnly = false,
   }) {
+    if (readOnly) {
+      return GestureDetector(
+        onTap: () {
+          if (hint == "Passengers") {
+            _showPassengerSelector();
+          } else if (hint == "Class") {
+            _showClassSelector();
+          }
+        },
+        child: Container(
+          width: width,
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade400),
+          ),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            controller.text.isEmpty ? hint : controller.text,
+            style: TextStyle(
+              color: controller.text.isEmpty
+                  ? Colors.grey.shade600
+                  : Colors.black,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      );
+    }
     return Container(
       width: width,
       height: 60,
@@ -325,9 +508,47 @@ class _BookRoundtrip extends State<BookRoundtrip> {
       ),
     );
   }
-}
 
-// Separate pages for navigation
+  Widget buildDatePickerField(String hint, TextEditingController controller) {
+    return GestureDetector(
+      onTap: () async {
+        DateTime today = DateTime.now();
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: today,
+          firstDate: today,
+          lastDate: DateTime(today.year + 2),
+        );
+
+        if (pickedDate != null) {
+          String formattedDate =
+              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+          controller.text = formattedDate;
+        }
+      },
+      child: Container(
+        width: 300,
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade400),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          controller.text.isEmpty ? hint : controller.text,
+          style: TextStyle(
+            color: controller.text.isEmpty
+                ? Colors.grey.shade600
+                : Colors.black,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class Page9 extends StatelessWidget {
   const Page9({super.key});
