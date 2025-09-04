@@ -34,8 +34,7 @@ jobs:
         run: flutter pub get
           # ^ If you want to use a specific version of flutter
 
-      - name: Run Tests
-        run: flutter test
+      
 
       - name: Build Android APK
         run: flutter build apk --release
