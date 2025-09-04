@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/roundtrip_flight.dart';
-import 'package:ticketing_flutter/pages/home.dart';
-
+import 'package:ticketing_flutter/pages/multi_flight.dart';
 // Import your other pages here
 
 class SearchFlightsPage extends StatefulWidget {
@@ -73,7 +72,7 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
         page = const RoundtripFlightsPage();
         break;
       case "Multicity":
-        page = const Home();
+        page = const MultiCitySearchFlightsPage();
         break;
       default:
         page = const SearchFlightsPage();

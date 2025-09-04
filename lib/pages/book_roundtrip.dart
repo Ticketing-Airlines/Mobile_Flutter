@@ -18,6 +18,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
   final TextEditingController box6Controller = TextEditingController();
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
+  final TextEditingController box9Controller = TextEditingController();
 
   int _adults = 1;
   int _children = 0;
@@ -59,14 +60,19 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                   _buildPassengerRow("Infants", _infants, (val) {
                     setState(() => _infants += val);
                   }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      final total = _adults + _children + _infants;
-                      box7Controller.text = "$total Passengers";
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 35,
+                    ), // move it higher
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final total = _adults + _children + _infants;
+                        box7Controller.text = "$total Passengers";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
                   ),
                 ],
               ),
@@ -222,7 +228,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 480.0;
+          final boxHeight = 550.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -317,6 +323,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                             buildAutocompleteField("To", box5Controller),
                             const SizedBox(height: 12),
                             buildDatePickerField("Departure", box6Controller),
+                            const SizedBox(height: 12),
+                            buildDatePickerField("Arrival", box9Controller),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -345,7 +353,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
                             _navigateToPage(
-                              "Box 9",
+                              "Box 10",
                               const RoundtripFlightsPage(),
                             );
                           },
@@ -517,10 +525,24 @@ class _BookRoundtrip extends State<BookRoundtrip> {
     return GestureDetector(
       onTap: () async {
         DateTime today = DateTime.now();
+
+        // Default first date is today
+        DateTime firstDate = today;
+
+        // If this is the "Arrival" field AND Departure has a value,
+        // force Arrival to be after Departure
+        if (hint == "Arrival" && box6Controller.text.isNotEmpty) {
+          try {
+            firstDate = DateTime.parse(box6Controller.text);
+          } catch (e) {
+            firstDate = today; // fallback if parsing fails
+          }
+        }
+
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: today,
-          firstDate: today,
+          initialDate: firstDate,
+          firstDate: firstDate,
           lastDate: DateTime(today.year + 2),
         );
 
@@ -528,6 +550,21 @@ class _BookRoundtrip extends State<BookRoundtrip> {
           String formattedDate =
               "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
           controller.text = formattedDate;
+
+          // Extra validation: if Arrival is before Departure, reset it
+          if (hint == "Arrival" &&
+              box6Controller.text.isNotEmpty &&
+              DateTime.tryParse(box6Controller.text) != null) {
+            DateTime departureDate = DateTime.parse(box6Controller.text);
+            if (pickedDate.isBefore(departureDate)) {
+              controller.clear(); // reset Arrival
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Arrival must be after Departure"),
+                ),
+              );
+            }
+          }
         }
       },
       child: Container(
@@ -550,17 +587,6 @@ class _BookRoundtrip extends State<BookRoundtrip> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Page9 extends StatelessWidget {
-  const Page9({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Page 9")),
-      body: const Center(child: Text("Welcome to Page 9")),
     );
   }
 }

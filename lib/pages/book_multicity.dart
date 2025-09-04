@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/book_oneway.dart';
 import 'package:ticketing_flutter/pages/book_roundtrip.dart';
+import 'package:ticketing_flutter/pages/multi_flight.dart';
 
-const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
+const List<String> countries = [
+  "Philippines - Manila",
+  "Japan - Tokyo",
+  "USA - New York",
+];
 
 class BookMulticity extends StatefulWidget {
   const BookMulticity({super.key});
 
   @override
-  State<BookMulticity> createState() => _BookMulticity();
+  State<BookMulticity> createState() => _BookMulticityState();
 }
 
-class _BookMulticity extends State<BookMulticity> {
-  final TextEditingController box4Controller = TextEditingController();
-  final TextEditingController box5Controller = TextEditingController();
-  final TextEditingController box6Controller = TextEditingController();
-  final TextEditingController box7Controller = TextEditingController();
-  final TextEditingController box8Controller = TextEditingController();
-
+class _BookMulticityState extends State<BookMulticity> {
   int _adults = 1;
   int _children = 0;
   int _infants = 0;
   String _selectedClass = "Economy";
 
+  final TextEditingController box7Controller = TextEditingController();
+  final TextEditingController box8Controller = TextEditingController();
+
   bool _isSearchPressed = false;
+
+  /// Multi-city list of routes
+  List<FlightRoute> routes = [FlightRoute()];
 
   @override
   void initState() {
@@ -32,7 +37,21 @@ class _BookMulticity extends State<BookMulticity> {
     box8Controller.text = _selectedClass;
   }
 
-  void _navigateToPage(String boxName, Widget page) {
+  void _addRoute() {
+    setState(() {
+      routes.add(FlightRoute());
+    });
+  }
+
+  void _removeRoute(int index) {
+    setState(() {
+      if (routes.length > 1) {
+        routes.removeAt(index);
+      }
+    });
+  }
+
+  void _navigateToPage(Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
@@ -41,31 +60,36 @@ class _BookMulticity extends State<BookMulticity> {
       context: context,
       builder: (BuildContext bc) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (BuildContext context, StateSetter setStateModal) {
             return Container(
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   _buildPassengerRow("Adults", _adults, (val) {
-                    setState(() => _adults += val);
+                    setStateModal(() => _adults += val);
                   }, min: 1),
                   const Divider(),
                   _buildPassengerRow("Children", _children, (val) {
-                    setState(() => _children += val);
+                    setStateModal(() => _children += val);
                   }),
                   const Divider(),
                   _buildPassengerRow("Infants", _infants, (val) {
-                    setState(() => _infants += val);
+                    setStateModal(() => _infants += val);
                   }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      final total = _adults + _children + _infants;
-                      box7Controller.text = "$total Passengers";
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 35,
+                    ), // move it higher
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final total = _adults + _children + _infants;
+                        box7Controller.text = "$total Passengers";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
                   ),
                 ],
               ),
@@ -221,7 +245,7 @@ class _BookMulticity extends State<BookMulticity> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 480.0;
+          final boxHeight = 600.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -287,35 +311,39 @@ class _BookMulticity extends State<BookMulticity> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () =>
-                                  _navigateToPage("Box 1", const BookOneway()),
+                              onTap: () => _navigateToPage(const BookOneway()),
                               child: buildClickableBox("One-Way"),
                             ),
                             GestureDetector(
-                              onTap: () => _navigateToPage(
-                                "Box 2",
-                                const BookRoundtrip(),
-                              ),
+                              onTap: () =>
+                                  _navigateToPage(const BookRoundtrip()),
                               child: buildClickableBox("Roundtrip"),
                             ),
                             buildClickableBox("Multi-City", isSelected: true),
                           ],
                         ),
                         const SizedBox(height: 20),
-                        Column(
-                          children: [
-                            buildAutocompleteField("From", box4Controller),
-                            const SizedBox(height: 12),
-                            buildAutocompleteField("To", box5Controller),
-                            const SizedBox(height: 12),
-                            buildDatePickerField("Departure", box6Controller),
-                          ],
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: routes.length,
+                            itemBuilder: (context, index) {
+                              return FlightRouteCard(
+                                route: routes[index],
+                                onRemove: () => _removeRoute(index),
+                              );
+                            },
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: _addRoute,
+                          icon: const Icon(Icons.add),
+                          label: const Text("Add Another City"),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -342,7 +370,13 @@ class _BookMulticity extends State<BookMulticity> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const MultiCitySearchFlightsPage(),
+                              ),
+                            );
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
@@ -356,14 +390,6 @@ class _BookMulticity extends State<BookMulticity> {
                                   ? Colors.blue.shade900
                                   : const Color.fromARGB(255, 68, 138, 255),
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: const Center(
                               child: Text(
@@ -434,14 +460,6 @@ class _BookMulticity extends State<BookMulticity> {
       decoration: BoxDecoration(
         color: isSelected ? Colors.blue : Colors.blue.shade200,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Center(
         child: Text(
@@ -507,8 +525,94 @@ class _BookMulticity extends State<BookMulticity> {
       ),
     );
   }
+}
 
-  Widget buildDatePickerField(String hint, TextEditingController controller) {
+class FlightRoute {
+  final TextEditingController fromController = TextEditingController();
+  final TextEditingController toController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+}
+
+class FlightRouteCard extends StatelessWidget {
+  final FlightRoute route;
+  final VoidCallback onRemove;
+
+  const FlightRouteCard({
+    super.key,
+    required this.route,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        buildAutocompleteField("From", route.fromController),
+        const SizedBox(height: 12),
+        buildAutocompleteField("To", route.toController),
+        const SizedBox(height: 12),
+        buildDatePickerField(
+          "Departure",
+          route.dateController,
+          context,
+        ), // ✅ fixed
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: onRemove,
+            icon: const Icon(Icons.delete, color: Colors.red),
+            label: const Text("Remove"),
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Widget buildAutocompleteField(String hint, TextEditingController controller) {
+    return Container(
+      width: 300,
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) {
+            return const Iterable<String>.empty();
+          }
+          return countries.where(
+            (country) => country.toLowerCase().contains(
+              textEditingValue.text.toLowerCase(),
+            ),
+          );
+        },
+        onSelected: (String selection) {
+          controller.text = selection;
+        },
+        fieldViewBuilder:
+            (context, textController, focusNode, onFieldSubmitted) {
+              return TextField(
+                controller: textController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  border: InputBorder.none,
+                ),
+              );
+            },
+      ),
+    );
+  }
+
+  Widget buildDatePickerField(
+    String hint,
+    TextEditingController controller,
+    BuildContext context,
+  ) {
     return GestureDetector(
       onTap: () async {
         DateTime today = DateTime.now();

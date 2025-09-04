@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/pages/book_roundtrip.dart';
 import 'package:ticketing_flutter/pages/book_multicity.dart';
+import 'package:ticketing_flutter/pages/search_flight.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
@@ -58,14 +59,19 @@ class _BookOneway extends State<BookOneway> {
                   _buildPassengerRow("Infants", _infants, (val) {
                     setState(() => _infants += val);
                   }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      final total = _adults + _children + _infants;
-                      box7Controller.text = "$total Passengers";
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 35,
+                    ), // move it higher
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final total = _adults + _children + _infants;
+                        box7Controller.text = "$total Passengers";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
                   ),
                 ],
               ),
@@ -81,12 +87,19 @@ class _BookOneway extends State<BookOneway> {
       context: context,
       builder: (BuildContext bc) {
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.only(
+            top: 12,
+            left: 20,
+            right: 20,
+            bottom: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _buildClassOption("Economy"),
+              const Divider(),
               _buildClassOption("Business"),
+              const Divider(),
               _buildClassOption("First Class"),
             ],
           ),
@@ -344,7 +357,7 @@ class _BookOneway extends State<BookOneway> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            _navigateToPage("Box 9", const SearchFlightsPage());
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
@@ -547,17 +560,6 @@ class _BookOneway extends State<BookOneway> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Page9 extends StatelessWidget {
-  const Page9({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Page 9")),
-      body: const Center(child: Text("Welcome to Page 9")),
     );
   }
 }

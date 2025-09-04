@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ticketing_flutter/pages/search_flight.dart';
+import 'package:ticketing_flutter/pages/multi_flight.dart';
 
 class RoundtripFlightsPage extends StatefulWidget {
   const RoundtripFlightsPage({super.key});
@@ -8,7 +10,7 @@ class RoundtripFlightsPage extends StatefulWidget {
 }
 
 class _RoundtripFlightsPageState extends State<RoundtripFlightsPage> {
-  String selectedTripType = "One Way";
+  String selectedTripType = "Roundtrip";
 
   // Trip type options
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
@@ -61,13 +63,13 @@ class _RoundtripFlightsPageState extends State<RoundtripFlightsPage> {
 
     switch (tripType) {
       case "One Way":
-        page = const RoundtripFlightsPage();
+        page = const SearchFlightsPage();
         break;
       case "Roundtrip":
         page = const RoundtripFlightsPage();
         break;
       case "Multicity":
-        page = const RoundtripFlightsPage();
+        page = const MultiCitySearchFlightsPage();
         break;
       default:
         page = const RoundtripFlightsPage();
