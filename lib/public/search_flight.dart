@@ -1,60 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/search_flight.dart';
-import 'package:ticketing_flutter/pages/multi_flight.dart';
+import 'package:ticketing_flutter/public/roundtrip_flight.dart';
+import 'package:ticketing_flutter/public/multi_flight.dart';
+// Import your other pages here
 
-class RoundtripFlightsPage extends StatefulWidget {
-  const RoundtripFlightsPage({super.key});
+class SearchFlightsPage extends StatefulWidget {
+  const SearchFlightsPage({super.key});
 
   @override
-  State<RoundtripFlightsPage> createState() => _RoundtripFlightsPageState();
+  State<SearchFlightsPage> createState() => _SearchFlightsPage();
 }
 
-class _RoundtripFlightsPageState extends State<RoundtripFlightsPage> {
-  String selectedTripType = "Roundtrip";
+class _SearchFlightsPage extends State<SearchFlightsPage> {
+  // Default selected option
+  String selectedTripType = "One Way";
 
   // Trip type options
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
-  // Mock roundtrip flight data
+
+  // Mock flight data (5 flights)
   final List<Map<String, String>> flights = const [
     {
       "from": "Philippines",
       "to": "Japan",
       "airline": "Philippine Airlines",
-      "depart": "2025-09-05 08:30 AM",
-      "return": "2025-09-12 10:00 AM",
-      "price": "\$650",
+      "date": "2025-09-05",
+      "time": "08:30 AM",
+      "price": "\$350",
     },
     {
       "from": "Philippines",
       "to": "Singapore",
       "airline": "Cebu Pacific",
-      "depart": "2025-09-06 12:45 PM",
-      "return": "2025-09-10 06:20 PM",
-      "price": "\$350",
+      "date": "2025-09-06",
+      "time": "12:45 PM",
+      "price": "\$200",
     },
     {
       "from": "Philippines",
       "to": "USA",
       "airline": "Delta Airlines",
-      "depart": "2025-09-07 09:00 PM",
-      "return": "2025-09-20 07:45 PM",
-      "price": "\$1200",
+      "date": "2025-09-07",
+      "time": "09:00 PM",
+      "price": "\$800",
     },
     {
       "from": "Philippines",
       "to": "Dubai",
       "airline": "Emirates",
-      "depart": "2025-09-08 02:15 AM",
-      "return": "2025-09-15 01:00 AM",
-      "price": "\$950",
+      "date": "2025-09-08",
+      "time": "02:15 AM",
+      "price": "\$600",
     },
     {
       "from": "Philippines",
       "to": "South Korea",
       "airline": "Korean Air",
-      "depart": "2025-09-09 06:50 AM",
-      "return": "2025-09-16 09:30 AM",
-      "price": "\$700",
+      "date": "2025-09-09",
+      "time": "06:50 AM",
+      "price": "\$400",
     },
   ];
 
@@ -72,7 +75,7 @@ class _RoundtripFlightsPageState extends State<RoundtripFlightsPage> {
         page = const MultiCitySearchFlightsPage();
         break;
       default:
-        page = const RoundtripFlightsPage();
+        page = const SearchFlightsPage();
     }
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -147,11 +150,9 @@ class _RoundtripFlightsPageState extends State<RoundtripFlightsPage> {
                       Icons.flight_takeoff,
                       color: Colors.blue,
                     ),
-                    title: Text("${flight["from"]} ↔ ${flight["to"]}"),
+                    title: Text("${flight["from"]} → ${flight["to"]}"),
                     subtitle: Text(
-                      "${flight["airline"]}\n"
-                      "Depart: ${flight["depart"]}\n"
-                      "Return: ${flight["return"]}",
+                      "${flight["airline"]}\nDate: ${flight["date"]}  Time: ${flight["time"]}",
                     ),
                     trailing: Text(
                       flight["price"]!,

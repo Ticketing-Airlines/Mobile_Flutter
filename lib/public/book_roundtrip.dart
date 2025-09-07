@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/book_oneway.dart';
-import 'package:ticketing_flutter/pages/book_multicity.dart';
-import 'package:ticketing_flutter/pages/roundtrip_flight.dart';
+import 'package:ticketing_flutter/public/book_oneway.dart';
+import 'package:ticketing_flutter/public/book_multicity.dart';
+import 'package:ticketing_flutter/public/roundtrip_flight.dart';
+import 'package:ticketing_flutter/auth/login.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
@@ -216,9 +217,13 @@ class _BookRoundtrip extends State<BookRoundtrip> {
               leading: const Icon(Icons.login),
               title: const Text('Login'),
               onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
+                Navigator.pop(context); // close the drawer first
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const LoginPage(), // <-- your login page here
+                  ),
                 );
               },
             ),

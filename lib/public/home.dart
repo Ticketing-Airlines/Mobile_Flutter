@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/book.dart';
+import 'package:ticketing_flutter/public/book.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

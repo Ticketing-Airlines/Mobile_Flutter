@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/roundtrip_flight.dart';
-import 'package:ticketing_flutter/pages/search_flight.dart';
+import 'package:ticketing_flutter/public/roundtrip_flight.dart';
+import 'package:ticketing_flutter/public/search_flight.dart';
 
 class MultiCitySearchFlightsPage extends StatefulWidget {
   const MultiCitySearchFlightsPage({super.key});
