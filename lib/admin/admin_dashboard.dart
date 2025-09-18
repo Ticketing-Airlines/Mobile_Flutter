@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'flights_page.dart';
 import 'package:ticketing_flutter/public/home.dart';
-import 'package:ticketing_flutter/admin/flights_page.dart';
+import 'users_page.dart';
+//import 'package:ticketing_flutter/admin/flights_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-// Main application widget
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -21,7 +21,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// The main dashboard widget with navigation
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -44,26 +43,52 @@ class _AdminDashboardState extends State<AdminDashboard> {
       _selectedIndex = index;
     });
 
-    // Navigate to another page
     if (index == 0) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const FlightsPage()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const FlightsPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       );
     } else if (index == 1) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const UserPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       );
     } else if (index == 2) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const UserPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       );
     } else if (index == 3) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       );
     }
   }
@@ -74,10 +99,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: Center(
         child: GestureDetector(
           onTap: () {
-            // Navigate to FlightsPage when clicked
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const FlightsPage()),
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const FlightsPage(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
             );
           },
         ),
@@ -93,6 +125,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             label: 'Analytics',
           ),
         ],
+
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.grey,
         unselectedItemColor: Colors.grey,

@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/auth/register.dart';
 import 'package:ticketing_flutter/admin/admin_dashboard.dart';
 
-// import your register page and admin login page
-// import 'register_page.dart';
-// import 'admin_login_page.dart';
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -20,26 +16,48 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
+          ),
+        ),
+        child: Center(
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const Icon(Icons.flight, size: 80, color: Colors.white),
+                const SizedBox(height: 15),
                 const Text(
                   "User Login",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 30),
 
                 // Gmail input
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
                     labelText: "Gmail",
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.email, color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white70),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -49,10 +67,19 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
                     labelText: "Password",
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white70),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -60,25 +87,39 @@ class _LoginPageState extends State<LoginPage> {
                 // Login button
                 SizedBox(
                   width: double.infinity,
+                  height: 50,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      side: const BorderSide(color: Colors.white, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                     onPressed: () {
                       String email = emailController.text;
                       String password = passwordController.text;
-                      // TODO: Implement your login logic here
+                      // TODO: Add user login logic
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Login with $email")),
                       );
                     },
-                    child: const Text("Login"),
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
-                // Admin option (below login form)
+                // Admin option
                 TextButton(
                   onPressed: () {
-                    // Navigate to admin login page
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -91,18 +132,20 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: Colors.redAccent,
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Register option
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don’t have an account? "),
+                    const Text(
+                      "Don’t have an account? ",
+                      style: TextStyle(color: Colors.white70),
+                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -115,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text(
                         "Register now",
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Colors.blueAccent,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -131,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// Example Admin Login Page
+// Admin Login Page
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
 
@@ -146,39 +189,73 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Admin Login")),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
+          ),
+        ),
+        child: Center(
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const Icon(
+                  Icons.admin_panel_settings,
+                  size: 80,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 15),
                 const Text(
                   "Admin Login",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 30),
 
-                // Username input
+                // Username
                 TextField(
                   controller: usernameController,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
                     labelText: "Username",
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.person, color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white70),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Password input
+                // Password
                 TextField(
                   controller: adminPasswordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
                     labelText: "Password",
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white70),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -186,12 +263,21 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 // Login button
                 SizedBox(
                   width: double.infinity,
+                  height: 50,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      side: const BorderSide(color: Colors.white, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                     onPressed: () {
                       String username = usernameController.text;
                       String password = adminPasswordController.text;
 
-                      // Here you should validate the admin login credentials
                       if (username == "admin@gmail.com" && password == "1234") {
                         Navigator.push(
                           context,
@@ -207,7 +293,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         );
                       }
                     },
-                    child: const Text("Login as Admin"),
+                    child: const Text(
+                      "Login as Admin",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],

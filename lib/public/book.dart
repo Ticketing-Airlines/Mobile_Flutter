@@ -36,7 +36,16 @@ class _Book extends State<Book> {
   }
 
   void _navigateToPage(String boxName, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   void _showPassengerSelector() {
@@ -63,9 +72,7 @@ class _Book extends State<Book> {
                   }),
                   const SizedBox(height: 10),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 35,
-                    ), // move it higher
+                    padding: const EdgeInsets.only(bottom: 35),
                     child: ElevatedButton(
                       onPressed: () {
                         final total = _adults + _children + _infants;
@@ -155,6 +162,7 @@ class _Book extends State<Book> {
     return Scaffold(
       drawer: Drawer(
         width: 300.0,
+        backgroundColor: const Color(0xFF111827),
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -163,7 +171,17 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
               },
               child: const DrawerHeader(
-                decoration: BoxDecoration(color: Colors.blue),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF000000),
+                      Color(0xFF111827),
+                      Color(0xFF1E3A8A),
+                    ],
+                  ),
+                ),
                 child: Text(
                   'Menu',
                   style: TextStyle(color: Colors.white, fontSize: 24),
@@ -171,66 +189,57 @@ class _Book extends State<Book> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.flight),
-              title: const Text('Book'),
+              leading: const Icon(Icons.flight, color: Colors.white),
+              title: const Text('Book', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.manage_accounts),
-              title: const Text('Manage'),
+              leading: const Icon(Icons.manage_accounts, color: Colors.white),
+              title: const Text(
+                'Manage',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Contact")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('Travel Info'),
+              leading: const Icon(Icons.info, color: Colors.white),
+              title: const Text(
+                'Travel Info',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to About")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.explore),
-              title: const Text('Explore'),
+              leading: const Icon(Icons.explore, color: Colors.white),
+              title: const Text(
+                'Explore',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('About'),
+              leading: const Icon(Icons.home, color: Colors.white),
+              title: const Text('About', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.login),
-              title: const Text('Login'),
+              leading: const Icon(Icons.login, color: Colors.white),
+              title: const Text('Login', style: TextStyle(color: Colors.white)),
               onTap: () {
-                Navigator.pop(context); // close the drawer first
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const LoginPage(), // <-- your login page here
-                  ),
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
             ),
@@ -252,10 +261,18 @@ class _Book extends State<Book> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: Image.asset(
-                      'assets/half.jpg',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF000000),
+                            Color(0xFF111827),
+                            Color(0xFF1E3A8A),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -361,6 +378,7 @@ class _Book extends State<Book> {
                           ],
                         ),
                         const SizedBox(height: 20),
+                        // 🔹 Updated Search Button
                         GestureDetector(
                           onTapDown: (_) {
                             setState(() => _isSearchPressed = true);
@@ -374,12 +392,22 @@ class _Book extends State<Book> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: 300,
-                            height: 70,
+                            width: double.infinity, // w-full
+                            height: 56, // h-14
                             decoration: BoxDecoration(
                               color: _isSearchPressed
-                                  ? Colors.blue.shade900
-                                  : const Color.fromARGB(255, 68, 138, 255),
+                                  ? const Color.fromARGB(
+                                      255,
+                                      53,
+                                      56,
+                                      58,
+                                    ) // Slightly darker when pressed
+                                  : const Color.fromARGB(
+                                      255,
+                                      5,
+                                      23,
+                                      37,
+                                    ), // Same as lower drawer half
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -390,14 +418,25 @@ class _Book extends State<Book> {
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Search Flights',
-                                style: TextStyle(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.search,
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                  size: 20,
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Search Flights',
+                                  style: TextStyle(
+                                    color: Colors
+                                        .white, // Black text for visibility
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -457,8 +496,9 @@ class _Book extends State<Book> {
       width: 93,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.blue.shade200,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -472,7 +512,7 @@ class _Book extends State<Book> {
         child: Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),

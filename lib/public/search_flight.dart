@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/public/multi_flight.dart';
-// Import your other pages here
+import 'package:ticketing_flutter/services/flight_service.dart';
 
 class SearchFlightsPage extends StatefulWidget {
   const SearchFlightsPage({super.key});
@@ -17,49 +17,8 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
   // Trip type options
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
 
-  // Mock flight data (5 flights)
-  final List<Map<String, String>> flights = const [
-    {
-      "from": "Philippines",
-      "to": "Japan",
-      "airline": "Philippine Airlines",
-      "date": "2025-09-05",
-      "time": "08:30 AM",
-      "price": "\$350",
-    },
-    {
-      "from": "Philippines",
-      "to": "Singapore",
-      "airline": "Cebu Pacific",
-      "date": "2025-09-06",
-      "time": "12:45 PM",
-      "price": "\$200",
-    },
-    {
-      "from": "Philippines",
-      "to": "USA",
-      "airline": "Delta Airlines",
-      "date": "2025-09-07",
-      "time": "09:00 PM",
-      "price": "\$800",
-    },
-    {
-      "from": "Philippines",
-      "to": "Dubai",
-      "airline": "Emirates",
-      "date": "2025-09-08",
-      "time": "02:15 AM",
-      "price": "\$600",
-    },
-    {
-      "from": "Philippines",
-      "to": "South Korea",
-      "airline": "Korean Air",
-      "date": "2025-09-09",
-      "time": "06:50 AM",
-      "price": "\$400",
-    },
-  ];
+  // Get flights from the shared service
+  final FlightService _flightService = FlightService();
 
   void _navigateToPage(String tripType) {
     Widget page;
@@ -137,12 +96,12 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
 
           const SizedBox(height: 20),
 
-          // Flights list
+          // Flights list - now using shared flight service
           Expanded(
             child: ListView.builder(
-              itemCount: flights.length,
+              itemCount: _flightService.getSearchFlights().length,
               itemBuilder: (context, index) {
-                final flight = flights[index];
+                final flight = _flightService.getSearchFlights()[index];
                 return Card(
                   margin: const EdgeInsets.all(10),
                   child: ListTile(
