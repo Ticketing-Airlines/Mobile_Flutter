@@ -17,6 +17,7 @@ class _BookOneway extends State<BookOneway> {
   final TextEditingController box4Controller = TextEditingController();
   final TextEditingController box5Controller = TextEditingController();
   final TextEditingController box6Controller = TextEditingController();
+  int _selectedPrice = 10000;
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
 
@@ -248,7 +249,7 @@ class _BookOneway extends State<BookOneway> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 480.0;
+          final boxHeight = 500.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -299,6 +300,24 @@ class _BookOneway extends State<BookOneway> {
                       },
                     );
                   },
+                ),
+              ),
+              // Prompt text just above the booking box
+              Positioned(
+                top: boxTop - 45, // 45 pixels above the box
+                left: boxLeft,
+                child: SizedBox(
+                  width: boxWidth,
+                  child: Center(
+                    child: Text(
+                      'Where do you want to fly?',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 129, 150, 207),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               Positioned(
@@ -594,42 +613,65 @@ class _BookOneway extends State<BookOneway> {
   }
 
   Widget buildDatePickerField(String hint, TextEditingController controller) {
-    return GestureDetector(
-      onTap: () async {
-        DateTime today = DateTime.now();
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: today,
-          firstDate: today,
-          lastDate: DateTime(today.year + 2),
-        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            DateTime today = DateTime.now();
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: today,
+              firstDate: today,
+              lastDate: DateTime(today.year + 2),
+            );
 
-        if (pickedDate != null) {
-          String formattedDate =
-              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-          controller.text = formattedDate;
-        }
-      },
-      child: Container(
-        width: 300,
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        alignment: Alignment.centerLeft,
-        child: Text(
-          controller.text.isEmpty ? hint : controller.text,
-          style: TextStyle(
-            color: controller.text.isEmpty
-                ? Colors.grey.shade600
-                : Colors.black,
-            fontSize: 16,
+            if (pickedDate != null) {
+              String formattedDate =
+                  "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+              controller.text = formattedDate;
+              int daysDiff = pickedDate.difference(today).inDays;
+              setState(() {
+                _selectedPrice = 10000 - (daysDiff * 100);
+                if (_selectedPrice < 5000)
+                  _selectedPrice = 5000; // minimum price
+              });
+            }
+          },
+          child: Container(
+            width: 300,
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              controller.text.isEmpty ? hint : controller.text,
+              style: TextStyle(
+                color: controller.text.isEmpty
+                    ? Colors.grey.shade600
+                    : Colors.black,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
-      ),
+        if (controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 8),
+            child: Text(
+              'Price: ₱${_selectedPrice}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
