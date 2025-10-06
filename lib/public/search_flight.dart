@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/public/multi_flight.dart';
 import 'package:ticketing_flutter/services/flight_service.dart';
+import 'flight_booking_page.dart';
+import 'package:ticketing_flutter/public/guest_details_page.dart';
 
 class SearchFlightsPage extends StatefulWidget {
   const SearchFlightsPage({super.key});
@@ -121,6 +123,15 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
                       ),
                     ),
                     isThreeLine: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              GuestDetailsPage(flight: flight),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
