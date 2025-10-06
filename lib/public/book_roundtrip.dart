@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/book_roundtrip.dart';
-import 'package:ticketing_flutter/pages/book_multicity.dart';
+import 'package:ticketing_flutter/public/book_oneway.dart';
+import 'package:ticketing_flutter/public/book_multicity.dart';
+import 'package:ticketing_flutter/public/roundtrip_flight.dart';
+import 'package:ticketing_flutter/auth/login.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
-class BookOneway extends StatefulWidget {
-  const BookOneway({super.key});
+class BookRoundtrip extends StatefulWidget {
+  const BookRoundtrip({super.key});
 
   @override
-  State<BookOneway> createState() => _BookOneway();
+  State<BookRoundtrip> createState() => _BookRoundtrip();
 }
 
-class _BookOneway extends State<BookOneway> {
+class _BookRoundtrip extends State<BookRoundtrip> {
   final TextEditingController box4Controller = TextEditingController();
   final TextEditingController box5Controller = TextEditingController();
   final TextEditingController box6Controller = TextEditingController();
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
+  final TextEditingController box9Controller = TextEditingController();
 
   int _adults = 1;
   int _children = 0;
@@ -33,7 +36,16 @@ class _BookOneway extends State<BookOneway> {
   }
 
   void _navigateToPage(String boxName, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   void _showPassengerSelector() {
@@ -58,14 +70,19 @@ class _BookOneway extends State<BookOneway> {
                   _buildPassengerRow("Infants", _infants, (val) {
                     setState(() => _infants += val);
                   }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      final total = _adults + _children + _infants;
-                      box7Controller.text = "$total Passengers";
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 35,
+                    ), // move it higher
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final total = _adults + _children + _infants;
+                        box7Controller.text = "$total Passengers";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
                   ),
                 ],
               ),
@@ -140,6 +157,7 @@ class _BookOneway extends State<BookOneway> {
     return Scaffold(
       drawer: Drawer(
         width: 300.0,
+        backgroundColor: const Color(0xFF111827),
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -148,7 +166,17 @@ class _BookOneway extends State<BookOneway> {
                 Navigator.pop(context);
               },
               child: const DrawerHeader(
-                decoration: BoxDecoration(color: Colors.blue),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF000000),
+                      Color(0xFF111827),
+                      Color(0xFF1E3A8A),
+                    ],
+                  ),
+                ),
                 child: Text(
                   'Menu',
                   style: TextStyle(color: Colors.white, fontSize: 24),
@@ -156,62 +184,57 @@ class _BookOneway extends State<BookOneway> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.flight),
-              title: const Text('Book'),
+              leading: const Icon(Icons.flight, color: Colors.white),
+              title: const Text('Book', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.manage_accounts),
-              title: const Text('Manage'),
+              leading: const Icon(Icons.manage_accounts, color: Colors.white),
+              title: const Text(
+                'Manage',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Contact")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('Travel Info'),
+              leading: const Icon(Icons.info, color: Colors.white),
+              title: const Text(
+                'Travel Info',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to About")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.explore),
-              title: const Text('Explore'),
+              leading: const Icon(Icons.explore, color: Colors.white),
+              title: const Text(
+                'Explore',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('About'),
+              leading: const Icon(Icons.home, color: Colors.white),
+              title: const Text('About', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.login),
-              title: const Text('Login'),
+              leading: const Icon(Icons.login, color: Colors.white),
+              title: const Text('Login', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
             ),
@@ -221,7 +244,7 @@ class _BookOneway extends State<BookOneway> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 480.0;
+          final boxHeight = 530.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -233,10 +256,18 @@ class _BookOneway extends State<BookOneway> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: Image.asset(
-                      'assets/half.jpg',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF000000),
+                            Color(0xFF111827),
+                            Color(0xFF1E3A8A),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -292,14 +323,13 @@ class _BookOneway extends State<BookOneway> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            buildClickableBox("One-way", isSelected: true),
                             GestureDetector(
-                              onTap: () => _navigateToPage(
-                                "Box 2",
-                                const BookRoundtrip(),
-                              ),
-                              child: buildClickableBox("Roundtrip"),
+                              onTap: () =>
+                                  _navigateToPage("Box 1", const BookOneway()),
+                              child: buildClickableBox("One-way"),
                             ),
+                            buildClickableBox("Roundtrip", isSelected: true),
+
                             GestureDetector(
                               onTap: () => _navigateToPage(
                                 "Box 3",
@@ -317,6 +347,8 @@ class _BookOneway extends State<BookOneway> {
                             buildAutocompleteField("To", box5Controller),
                             const SizedBox(height: 12),
                             buildDatePickerField("Departure", box6Controller),
+                            const SizedBox(height: 12),
+                            buildDatePickerField("Arrival", box9Controller),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -344,19 +376,27 @@ class _BookOneway extends State<BookOneway> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            _navigateToPage(
+                              "Box 9",
+                              const RoundtripFlightsPage(),
+                            );
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: 300,
-                            height: 70,
+                            width: double.infinity, // w-full
+                            height: 56,
                             decoration: BoxDecoration(
                               color: _isSearchPressed
-                                  ? Colors.blue.shade900
-                                  : const Color.fromARGB(255, 68, 138, 255),
+                                  ? const Color.fromARGB(
+                                      255,
+                                      53,
+                                      56,
+                                      58,
+                                    ) // Slightly darker when pressed
+                                  : const Color.fromARGB(255, 5, 23, 37),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -368,12 +408,24 @@ class _BookOneway extends State<BookOneway> {
                               ],
                             ),
                             child: const Center(
-                              child: Text(
-                                'Search Flights',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Search Flights',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -430,31 +482,62 @@ class _BookOneway extends State<BookOneway> {
   }
 
   Widget buildClickableBox(String label, {bool isSelected = false}) {
-    return Container(
-      width: 93,
-      height: 50,
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.blue : Colors.blue.shade200,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    if (isSelected) {
+      // Black box with white text for "One-way"
+      return Container(
+        width: 93,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      // White box with black text and subtle shadow for Roundtrip and Multi-City
+      return Container(
+        width: 93,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget buildInputBox(
@@ -514,10 +597,24 @@ class _BookOneway extends State<BookOneway> {
     return GestureDetector(
       onTap: () async {
         DateTime today = DateTime.now();
+
+        // Default first date is today
+        DateTime firstDate = today;
+
+        // If this is the "Arrival" field AND Departure has a value,
+        // force Arrival to be after Departure
+        if (hint == "Arrival" && box6Controller.text.isNotEmpty) {
+          try {
+            firstDate = DateTime.parse(box6Controller.text);
+          } catch (e) {
+            firstDate = today; // fallback if parsing fails
+          }
+        }
+
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: today,
-          firstDate: today,
+          initialDate: firstDate,
+          firstDate: firstDate,
           lastDate: DateTime(today.year + 2),
         );
 
@@ -525,6 +622,21 @@ class _BookOneway extends State<BookOneway> {
           String formattedDate =
               "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
           controller.text = formattedDate;
+
+          // Extra validation: if Arrival is before Departure, reset it
+          if (hint == "Arrival" &&
+              box6Controller.text.isNotEmpty &&
+              DateTime.tryParse(box6Controller.text) != null) {
+            DateTime departureDate = DateTime.parse(box6Controller.text);
+            if (pickedDate.isBefore(departureDate)) {
+              controller.clear(); // reset Arrival
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Arrival must be after Departure"),
+                ),
+              );
+            }
+          }
         }
       },
       child: Container(
@@ -547,17 +659,6 @@ class _BookOneway extends State<BookOneway> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Page9 extends StatelessWidget {
-  const Page9({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Page 9")),
-      body: const Center(child: Text("Welcome to Page 9")),
     );
   }
 }

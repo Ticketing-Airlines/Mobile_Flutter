@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/book_oneway.dart';
-import 'package:ticketing_flutter/pages/book_roundtrip.dart';
-import 'package:ticketing_flutter/pages/book_multicity.dart';
+import 'package:ticketing_flutter/public/book_oneway.dart';
+import 'package:ticketing_flutter/public/book_roundtrip.dart';
+import 'package:ticketing_flutter/public/book_multicity.dart';
+import 'package:ticketing_flutter/public/search_flight.dart';
+import 'package:ticketing_flutter/auth/login.dart';
 
 const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
 
@@ -34,7 +36,16 @@ class _Book extends State<Book> {
   }
 
   void _navigateToPage(String boxName, Widget page) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   void _showPassengerSelector() {
@@ -59,14 +70,17 @@ class _Book extends State<Book> {
                   _buildPassengerRow("Infants", _infants, (val) {
                     setState(() => _infants += val);
                   }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      final total = _adults + _children + _infants;
-                      box7Controller.text = "$total Passengers";
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 35),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final total = _adults + _children + _infants;
+                        box7Controller.text = "$total Passengers";
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
                   ),
                 ],
               ),
@@ -82,12 +96,19 @@ class _Book extends State<Book> {
       context: context,
       builder: (BuildContext bc) {
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.only(
+            top: 12,
+            left: 20,
+            right: 20,
+            bottom: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _buildClassOption("Economy"),
+              const Divider(),
               _buildClassOption("Business"),
+              const Divider(),
               _buildClassOption("First Class"),
             ],
           ),
@@ -141,6 +162,7 @@ class _Book extends State<Book> {
     return Scaffold(
       drawer: Drawer(
         width: 300.0,
+        backgroundColor: const Color(0xFF111827),
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -149,7 +171,17 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
               },
               child: const DrawerHeader(
-                decoration: BoxDecoration(color: Colors.blue),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF000000),
+                      Color(0xFF111827),
+                      Color(0xFF1E3A8A),
+                    ],
+                  ),
+                ),
                 child: Text(
                   'Menu',
                   style: TextStyle(color: Colors.white, fontSize: 24),
@@ -157,62 +189,57 @@ class _Book extends State<Book> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.flight),
-              title: const Text('Book'),
+              leading: const Icon(Icons.flight, color: Colors.white),
+              title: const Text('Book', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.manage_accounts),
-              title: const Text('Manage'),
+              leading: const Icon(Icons.manage_accounts, color: Colors.white),
+              title: const Text(
+                'Manage',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Contact")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('Travel Info'),
+              leading: const Icon(Icons.info, color: Colors.white),
+              title: const Text(
+                'Travel Info',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to About")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.explore),
-              title: const Text('Explore'),
+              leading: const Icon(Icons.explore, color: Colors.white),
+              title: const Text(
+                'Explore',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('About'),
+              leading: const Icon(Icons.home, color: Colors.white),
+              title: const Text('About', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
-                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.login),
-              title: const Text('Login'),
+              leading: const Icon(Icons.login, color: Colors.white),
+              title: const Text('Login', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Navigating to Home")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
             ),
@@ -234,10 +261,18 @@ class _Book extends State<Book> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: Image.asset(
-                      'assets/half.jpg',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF000000),
+                            Color(0xFF111827),
+                            Color(0xFF1E3A8A),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -343,25 +378,36 @@ class _Book extends State<Book> {
                           ],
                         ),
                         const SizedBox(height: 20),
+                        // 🔹 Updated Search Button
                         GestureDetector(
                           onTapDown: (_) {
                             setState(() => _isSearchPressed = true);
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
-                            _navigateToPage("Box 9", const Page9());
+                            _navigateToPage("Box 9", const SearchFlightsPage());
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: 300,
-                            height: 70,
+                            width: double.infinity, // w-full
+                            height: 56, // h-14
                             decoration: BoxDecoration(
                               color: _isSearchPressed
-                                  ? Colors.blue.shade900
-                                  : const Color.fromARGB(255, 68, 138, 255),
+                                  ? const Color.fromARGB(
+                                      255,
+                                      53,
+                                      56,
+                                      58,
+                                    ) // Slightly darker when pressed
+                                  : const Color.fromARGB(
+                                      255,
+                                      5,
+                                      23,
+                                      37,
+                                    ), // Same as lower drawer half
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -372,14 +418,25 @@ class _Book extends State<Book> {
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Search Flights',
-                                style: TextStyle(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.search,
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                  size: 20,
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Search Flights',
+                                  style: TextStyle(
+                                    color: Colors
+                                        .white, // Black text for visibility
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -439,8 +496,9 @@ class _Book extends State<Book> {
       width: 93,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.blue.shade200,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -454,7 +512,7 @@ class _Book extends State<Book> {
         child: Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -552,17 +610,6 @@ class _Book extends State<Book> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Page9 extends StatelessWidget {
-  const Page9({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Page 9")),
-      body: const Center(child: Text("Welcome to Page 9")),
     );
   }
 }

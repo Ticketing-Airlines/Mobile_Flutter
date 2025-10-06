@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/pages/home.dart';
+import 'package:ticketing_flutter/public/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +10,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: Home());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: Home());
   }
 }
