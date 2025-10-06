@@ -20,6 +20,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
   final TextEditingController box9Controller = TextEditingController();
+  int _departurePrice = 10000;
+  int _arrivalPrice = 10000;
 
   int _adults = 1;
   int _children = 0;
@@ -244,7 +246,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 530.0;
+          final boxHeight = 590.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -295,6 +297,24 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                       },
                     );
                   },
+                ),
+              ),
+              // Prompt text just above the booking box
+              Positioned(
+                top: boxTop - 45, // 45 pixels above the box
+                left: boxLeft,
+                child: SizedBox(
+                  width: boxWidth,
+                  child: Center(
+                    child: Text(
+                      'Where do you want to fly?',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 129, 150, 207),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               Positioned(
@@ -594,71 +614,92 @@ class _BookRoundtrip extends State<BookRoundtrip> {
   }
 
   Widget buildDatePickerField(String hint, TextEditingController controller) {
-    return GestureDetector(
-      onTap: () async {
-        DateTime today = DateTime.now();
-
-        // Default first date is today
-        DateTime firstDate = today;
-
-        // If this is the "Arrival" field AND Departure has a value,
-        // force Arrival to be after Departure
-        if (hint == "Arrival" && box6Controller.text.isNotEmpty) {
-          try {
-            firstDate = DateTime.parse(box6Controller.text);
-          } catch (e) {
-            firstDate = today; // fallback if parsing fails
-          }
-        }
-
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: firstDate,
-          firstDate: firstDate,
-          lastDate: DateTime(today.year + 2),
-        );
-
-        if (pickedDate != null) {
-          String formattedDate =
-              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-          controller.text = formattedDate;
-
-          // Extra validation: if Arrival is before Departure, reset it
-          if (hint == "Arrival" &&
-              box6Controller.text.isNotEmpty &&
-              DateTime.tryParse(box6Controller.text) != null) {
-            DateTime departureDate = DateTime.parse(box6Controller.text);
-            if (pickedDate.isBefore(departureDate)) {
-              controller.clear(); // reset Arrival
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Arrival must be after Departure"),
-                ),
-              );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            DateTime today = DateTime.now();
+            DateTime firstDate = today;
+            if (hint == "Arrival" && box6Controller.text.isNotEmpty) {
+              try {
+                firstDate = DateTime.parse(box6Controller.text);
+              } catch (e) {
+                firstDate = today;
+              }
             }
-          }
-        }
-      },
-      child: Container(
-        width: 300,
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        alignment: Alignment.centerLeft,
-        child: Text(
-          controller.text.isEmpty ? hint : controller.text,
-          style: TextStyle(
-            color: controller.text.isEmpty
-                ? Colors.grey.shade600
-                : Colors.black,
-            fontSize: 16,
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: firstDate,
+              firstDate: firstDate,
+              lastDate: DateTime(today.year + 2),
+            );
+            if (pickedDate != null) {
+              String formattedDate =
+                  "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+              controller.text = formattedDate;
+              int daysDiff = pickedDate.difference(today).inDays;
+              int price = 10000 - (daysDiff * 100);
+              if (price < 5000) price = 5000;
+              setState(() {
+                if (hint == "Departure") {
+                  _departurePrice = price;
+                } else {
+                  _arrivalPrice = price;
+                }
+              });
+              // Extra validation: if Arrival is before Departure, reset it
+              if (hint == "Arrival" &&
+                  box6Controller.text.isNotEmpty &&
+                  DateTime.tryParse(box6Controller.text) != null) {
+                DateTime departureDate = DateTime.parse(box6Controller.text);
+                if (pickedDate.isBefore(departureDate)) {
+                  controller.clear();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Arrival must be after Departure"),
+                    ),
+                  );
+                }
+              }
+            }
+          },
+          child: Container(
+            width: 300,
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              controller.text.isEmpty ? hint : controller.text,
+              style: TextStyle(
+                color: controller.text.isEmpty
+                    ? Colors.grey.shade600
+                    : Colors.black,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
-      ),
+        if (controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 8),
+            child: Text(
+              hint == "Departure"
+                  ? 'Price: ₱${_departurePrice}'
+                  : 'Price: ₱${_arrivalPrice}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -314,6 +314,24 @@ class _BookMulticityState extends State<BookMulticity> {
                   },
                 ),
               ),
+              // Prompt text just above the booking box
+              Positioned(
+                top: boxTop - 45, // 45 pixels above the box
+                left: boxLeft,
+                child: SizedBox(
+                  width: boxWidth,
+                  child: Center(
+                    child: Text(
+                      'Where do you want to fly?',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 129, 150, 207),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               Positioned(
                 top: boxTop,
                 left: boxLeft,
@@ -635,6 +653,7 @@ class FlightRoute {
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+  int selectedPrice = 10000;
 }
 
 class FlightRouteCard extends StatelessWidget {
@@ -659,7 +678,22 @@ class FlightRouteCard extends StatelessWidget {
           "Departure",
           route.dateController,
           context,
-        ), // ✅ fixed
+          onPriceUpdate: (price) {
+            route.selectedPrice = price;
+          },
+        ),
+        if (route.dateController.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 8),
+            child: Text(
+              'Price: ₱${route.selectedPrice}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+          ),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton.icon(
@@ -715,8 +749,9 @@ class FlightRouteCard extends StatelessWidget {
   Widget buildDatePickerField(
     String hint,
     TextEditingController controller,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    Function(int)? onPriceUpdate,
+  }) {
     return GestureDetector(
       onTap: () async {
         DateTime today = DateTime.now();
@@ -731,6 +766,10 @@ class FlightRouteCard extends StatelessWidget {
           String formattedDate =
               "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
           controller.text = formattedDate;
+          int daysDiff = pickedDate.difference(today).inDays;
+          int price = 10000 - (daysDiff * 100);
+          if (price < 5000) price = 5000;
+          if (onPriceUpdate != null) onPriceUpdate(price);
         }
       },
       child: Container(

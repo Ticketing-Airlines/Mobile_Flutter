@@ -4,8 +4,7 @@ import 'package:ticketing_flutter/public/book_roundtrip.dart';
 import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/search_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
-
-const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
+import 'package:ticketing_flutter/services/countries.dart';
 
 class Book extends StatefulWidget {
   const Book({super.key});
@@ -18,6 +17,7 @@ class _Book extends State<Book> {
   final TextEditingController box4Controller = TextEditingController();
   final TextEditingController box5Controller = TextEditingController();
   final TextEditingController box6Controller = TextEditingController();
+  int _selectedPrice = 10000;
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
 
@@ -33,6 +33,36 @@ class _Book extends State<Book> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+  }
+
+  // New function to centralize price calculation
+  void _calculatePrice() {
+    // Only calculate if a date has been picked
+    if (box6Controller.text.isNotEmpty) {
+      DateTime today = DateTime.now();
+      DateTime pickedDate = DateTime.parse(box6Controller.text);
+      int daysDiff = pickedDate.difference(today).inDays;
+
+      // Base price logic (from buildDatePickerField)
+      int basePrice = 10000 - (daysDiff * 100);
+      if (basePrice < 2000) basePrice = 2000;
+
+      // Class multiplier logic (from _buildClassOption)
+      double multiplier = 1.0;
+      if (_selectedClass == "Business") {
+        multiplier = 3.0;
+      } else if (_selectedClass == "First Class") {
+        multiplier = 6.0;
+      }
+
+      // Recalculate and set the new selected price
+      _selectedPrice =
+          ((basePrice * _adults +
+                      (basePrice * 0.75 * _children).round() +
+                      (basePrice * 0.10 * _infants).round()) *
+                  multiplier)
+              .round();
+    }
   }
 
   void _navigateToPage(String boxName, Widget page) {
@@ -77,6 +107,12 @@ class _Book extends State<Book> {
                       onPressed: () {
                         final total = _adults + _children + _infants;
                         box7Controller.text = "$total Passengers";
+
+                        // Update the main state and calculate the new price
+                        this.setState(() {
+                          _calculatePrice();
+                        });
+
                         Navigator.pop(context);
                       },
                       child: const Text('Done'),
@@ -151,6 +187,8 @@ class _Book extends State<Book> {
         setState(() {
           _selectedClass = className;
           box8Controller.text = _selectedClass;
+          // Recalculate price based on class
+          _calculatePrice();
         });
         Navigator.pop(context);
       },
@@ -249,7 +287,7 @@ class _Book extends State<Book> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 480.0;
+          final boxHeight = 500.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -445,6 +483,23 @@ class _Book extends State<Book> {
                   ),
                 ),
               ),
+              Positioned(
+                top: boxTop - 45, // 40 pixels above the box
+                left: boxLeft,
+                child: SizedBox(
+                  width: boxWidth,
+                  child: Center(
+                    child: Text(
+                      'Where do you want to fly?',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 129, 150, 207),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -464,10 +519,22 @@ class _Book extends State<Book> {
       ),
       child: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty();
+          // Exclude the country selected in the other field
+          List<String> filteredCountries = countries1;
+          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
+            filteredCountries = countries1
+                .where((c) => c != box5Controller.text)
+                .toList();
+          } else if (controller == box5Controller &&
+              box4Controller.text.isNotEmpty) {
+            filteredCountries = countries1
+                .where((c) => c != box4Controller.text)
+                .toList();
           }
-          return countries.where(
+          if (textEditingValue.text.isEmpty) {
+            return filteredCountries;
+          }
+          return filteredCountries.where(
             (country) => country.toLowerCase().contains(
               textEditingValue.text.toLowerCase(),
             ),
@@ -475,6 +542,7 @@ class _Book extends State<Book> {
         },
         onSelected: (String selection) {
           controller.text = selection;
+          setState(() {}); // Refresh the other field's options
         },
         fieldViewBuilder:
             (context, textController, focusNode, onFieldSubmitted) {
@@ -574,42 +642,65 @@ class _Book extends State<Book> {
   }
 
   Widget buildDatePickerField(String hint, TextEditingController controller) {
-    return GestureDetector(
-      onTap: () async {
-        DateTime today = DateTime.now();
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: today,
-          firstDate: today,
-          lastDate: DateTime(today.year + 2),
-        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            DateTime today = DateTime.now();
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: today,
+              firstDate: today,
+              lastDate: DateTime(today.year + 2),
+            );
 
-        if (pickedDate != null) {
-          String formattedDate =
-              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-          controller.text = formattedDate;
-        }
-      },
-      child: Container(
-        width: 300,
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        alignment: Alignment.centerLeft,
-        child: Text(
-          controller.text.isEmpty ? hint : controller.text,
-          style: TextStyle(
-            color: controller.text.isEmpty
-                ? Colors.grey.shade600
-                : Colors.black,
-            fontSize: 16,
+            if (pickedDate != null) {
+              String formattedDate =
+                  "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+              controller.text = formattedDate;
+
+              // Calculate price based on date and current passengers/class
+              setState(() {
+                _calculatePrice();
+              });
+            }
+          },
+          child: Container(
+            width: 300,
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              controller.text.isEmpty ? hint : controller.text,
+              style: TextStyle(
+                color: controller.text.isEmpty
+                    ? Colors.grey.shade600
+                    : Colors.black,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
-      ),
+        // Only show price if a date has been selected
+        if (controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 8),
+            child: Text(
+              'Total Price: ₱${_selectedPrice}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
