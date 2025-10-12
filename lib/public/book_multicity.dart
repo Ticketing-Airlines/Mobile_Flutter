@@ -490,6 +490,33 @@ class _BookMulticityState extends State<BookMulticity> {
                   ),
                 ),
               ),
+              Positioned(
+                bottom: 49, // adjust as you like
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.copyright,
+                        size: 20,
+                        color: Color.fromARGB(179, 7, 7, 7),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        '2025 Airlines Ticketing. All Rights Reserved',
+                        style: TextStyle(
+                          color: Color.fromARGB(179, 26, 25, 25),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           );
         },

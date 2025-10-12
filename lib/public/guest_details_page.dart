@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/booking_summary.dart';
 
 class GuestDetailsPage extends StatefulWidget {
-  final Map<String, String> flight;
+  final Map<String, dynamic> flight;
 
   const GuestDetailsPage({super.key, required this.flight});
 

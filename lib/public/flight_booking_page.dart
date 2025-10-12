@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class FlightBookingPage extends StatefulWidget {
-  final Map<String, String> flight;
+  final Map<String, String>? flight;
 
-  const FlightBookingPage({super.key, required this.flight});
+  const FlightBookingPage({super.key, this.flight});
 
   @override
   State<FlightBookingPage> createState() => _FlightBookingPageState();
@@ -65,7 +65,16 @@ class _FlightBookingPageState extends State<FlightBookingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final flight = widget.flight;
+    final flight =
+        widget.flight ??
+        {
+          'from': 'Select Origin',
+          'to': 'Select Destination',
+          'date': 'Select Date',
+          'time': 'Select Time',
+          'price': 'TBD',
+          'airline': 'Airlines Ticketing',
+        };
 
     return Scaffold(
       appBar: AppBar(

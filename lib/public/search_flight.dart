@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/public/multi_flight.dart';
 import 'package:ticketing_flutter/services/flight_service.dart';
-import 'flight_booking_page.dart';
 import 'package:ticketing_flutter/public/guest_details_page.dart';
 
 class SearchFlightsPage extends StatefulWidget {
@@ -19,8 +18,18 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
   // Trip type options
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
 
-  // Get flights from the shared service
+  // Flight service instance
   final FlightService _flightService = FlightService();
+
+  // Future to hold the fetched flights
+  late Future<List<Map<String, dynamic>>> _flightsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch flights from the backend
+    _flightsFuture = _flightService.getAvailableFlights();
+  }
 
   void _navigateToPage(String tripType) {
     Widget page;
@@ -98,41 +107,55 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
 
           const SizedBox(height: 20),
 
-          // Flights list - now using shared flight service
+          // Flights list - fetched dynamically
           Expanded(
-            child: ListView.builder(
-              itemCount: _flightService.getSearchFlights().length,
-              itemBuilder: (context, index) {
-                final flight = _flightService.getSearchFlights()[index];
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.flight_takeoff,
-                      color: Colors.blue,
-                    ),
-                    title: Text("${flight["from"]} → ${flight["to"]}"),
-                    subtitle: Text(
-                      "${flight["airline"]}\nDate: ${flight["date"]}  Time: ${flight["time"]}",
-                    ),
-                    trailing: Text(
-                      flight["price"]!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
-                    isThreeLine: true,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              GuestDetailsPage(flight: flight),
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _flightsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No flights available"));
+                }
+
+                final flights = snapshot.data!;
+                return ListView.builder(
+                  itemCount: flights.length,
+                  itemBuilder: (context, index) {
+                    final flight = flights[index];
+                    return Card(
+                      margin: const EdgeInsets.all(10),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.flight_takeoff,
+                          color: Colors.blue,
                         ),
-                      );
-                    },
-                  ),
+                        title: Text("${flight["from"]} → ${flight["to"]}"),
+                        subtitle: Text(
+                          "${flight["airline"]}\nDate: ${flight["date"]}  Time: ${flight["time"]}",
+                        ),
+                        trailing: Text(
+                          "\$${flight["price"]}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                        isThreeLine: true,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  GuestDetailsPage(flight: flight),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 );
               },
             ),
