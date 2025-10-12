@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/book.dart';
+import 'package:ticketing_flutter/auth/login.dart'; // Add this import
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,6 +12,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool _isPressed = false;
   bool _isHovered = false;
+
+  bool _signInPressed = false;
 
   late PageController _pageController;
   int _currentPage = 0;
@@ -127,28 +130,50 @@ class _HomeState extends State<Home> {
           ),
 
           // Sign In text on the right side
+          // Sign In text on the right side
           Positioned(
             top:
                 50 +
                 (58 / 2) -
                 15, // 50 (start) + 32.5 (center) - 15 (half button height) = 67.5
             right: 20, // Right margin
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ), // Padding inside the box
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 3, 24, 41), // Blue background
-                borderRadius: BorderRadius.circular(20), // Rounded corners
-              ),
-              child: Text(
-                'Sign In',
-                style: TextStyle(
-                  color: Colors.white, // White text on blue background
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Gothic',
+            child: GestureDetector(
+              onTapDown: (_) => setState(() => _signInPressed = true),
+              onTapUp: (_) => setState(() => _signInPressed = false),
+              onTapCancel: () => setState(() => _signInPressed = false),
+              onTap: () {
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const LoginPage(),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                  ),
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeInOut,
+                padding: EdgeInsets.symmetric(
+                  horizontal: _signInPressed ? 21 : 15, // widen on touch
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(
+                    255,
+                    3,
+                    24,
+                    41,
+                  ), // Blue background
+                  borderRadius: BorderRadius.circular(20), // Rounded corners
+                ),
+                child: Text(
+                  'Sign In',
+                  style: TextStyle(
+                    color: Colors.white, // White text on blue background
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Gothic',
+                  ),
                 ),
               ),
             ),
@@ -279,9 +304,12 @@ class _HomeState extends State<Home> {
                     _isPressed = false;
                     _isHovered = false;
                   });
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Book()),
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const Book(),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                    ),
                   );
                 },
                 onTapCancel: () {
@@ -291,15 +319,21 @@ class _HomeState extends State<Home> {
                   });
                 },
                 onPanDown: (_) => setState(() => _isHovered = true),
-                onPanEnd: (_) => setState(() => _isHovered = false),
-                onPanCancel: () => setState(() => _isHovered = false),
+                onPanEnd: (_) => setState(() {
+                  _isHovered = false;
+                  _isPressed = false; // ensure it returns to original size
+                }),
+                onPanCancel: () => setState(() {
+                  _isHovered = false;
+                  _isPressed = false; // ensure it returns to original size
+                }),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
                   height: 60,
-                  width: 300, // Add this line to set specific width
+                  width: _isPressed ? 320 : 300, // widen box on press
                   padding: EdgeInsets.symmetric(
-                    horizontal: _isHovered ? 38 : 18,
+                    horizontal: _isPressed ? 24 : 20, // widen content on press
                   ),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
@@ -321,7 +355,6 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   child: Center(
-                    // Center the text
                     child: AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
                       style: TextStyle(
@@ -331,7 +364,9 @@ class _HomeState extends State<Home> {
                             ? Colors.blue.shade200
                             : Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: _isHovered ? 28 : 30,
+                        fontSize: _isPressed
+                            ? 32
+                            : 30, // don't shrink; grow a bit on press
                       ),
                       child: const Text('GET STARTED'),
                     ),

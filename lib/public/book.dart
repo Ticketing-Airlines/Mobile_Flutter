@@ -5,6 +5,8 @@ import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/search_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/countries.dart';
+import 'package:ticketing_flutter/public/flight_booking_page.dart';
+import 'dart:async';
 
 class Book extends StatefulWidget {
   const Book({super.key});
@@ -33,6 +35,8 @@ class _Book extends State<Book> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+
+    // auto-sliding info bar setup
   }
 
   // New function to centralize price calculation
@@ -231,6 +235,12 @@ class _Book extends State<Book> {
               title: const Text('Book', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FlightBookingPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -423,6 +433,42 @@ class _Book extends State<Book> {
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
+
+                            // Validation: Check if all required fields are filled
+                            if (box4Controller.text.isEmpty ||
+                                box5Controller.text.isEmpty ||
+                                box6Controller.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please fill in all required fields',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Validate that both country and city are selected for From/To fields
+                            bool isFromValid = box4Controller.text.contains(
+                              " - ",
+                            );
+                            bool isToValid = box5Controller.text.contains(
+                              " - ",
+                            );
+
+                            if (!isFromValid || !isToValid) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a city'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
                             _navigateToPage("Box 9", const SearchFlightsPage());
                           },
                           onTapCancel: () {
@@ -500,6 +546,35 @@ class _Book extends State<Book> {
                   ),
                 ),
               ),
+              Positioned(
+                bottom: 49, // adjust as you like
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.copyright,
+                        size: 20,
+                        color: Color.fromARGB(179, 7, 7, 7),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        '2025 Airlines Ticketing. All Rights Reserved',
+                        style: TextStyle(
+                          color: Color.fromARGB(179, 26, 25, 25),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // BELOW the main white box
             ],
           );
         },
@@ -517,25 +592,199 @@ class _Book extends State<Book> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: Autocomplete<String>(
+      child: RawAutocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          // Exclude the country selected in the other field
-          List<String> filteredCountries = countries1;
+          String input = textEditingValue.text.toLowerCase();
+          List<String> options = [];
+
+          // Check if the input is a country name (exact match)
+          bool isExactCountry = countries1.contains(textEditingValue.text);
+          if (isExactCountry) {
+            // User has selected a country, show cities for that country
+            String countryName = textEditingValue.text;
+            if (countryCities.containsKey(countryName)) {
+              List<String> cities = countryCities[countryName]!;
+              for (String city in cities) {
+                options.add(city); // Just show city names, not "Country - City"
+              }
+
+              // Exclude the option selected in the other field
+              if (controller == box4Controller &&
+                  box5Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box5Controller.text)
+                    .toList();
+              } else if (controller == box5Controller &&
+                  box4Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box4Controller.text)
+                    .toList();
+              }
+
+              return options;
+            }
+          }
+
+          // If input is empty or not an exact country match, show countries
+          List<String> countryOptions = List<String>.from(countries1);
+
+          // Exclude the option selected in the other field
           if (controller == box4Controller && box5Controller.text.isNotEmpty) {
-            filteredCountries = countries1
+            countryOptions = countryOptions
                 .where((c) => c != box5Controller.text)
                 .toList();
           } else if (controller == box5Controller &&
               box4Controller.text.isNotEmpty) {
-            filteredCountries = countries1
+            countryOptions = countryOptions
                 .where((c) => c != box4Controller.text)
                 .toList();
           }
-          if (textEditingValue.text.isEmpty) {
-            return filteredCountries;
+
+          return countryOptions;
+        },
+        fieldViewBuilder:
+            (context, textEditingController, focusNode, onFieldSubmitted) {
+              // Update the controller when this widget is first built
+              if (controller.text.isNotEmpty) {
+                textEditingController.text = controller.text;
+              }
+
+              return TextField(
+                controller: textEditingController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  border: InputBorder.none,
+                ),
+                onTap: () {
+                  // This will force the options to show immediately when field is tapped
+                  textEditingController.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: textEditingController.text.length,
+                  );
+                  // Trigger the options to show by simulating a change
+                  focusNode.requestFocus();
+                },
+                onChanged: (value) {
+                  controller.text = value;
+                },
+              );
+            },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4.0,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 200,
+                  maxWidth: 300,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final String option = options.elementAt(index);
+                    return InkWell(
+                      onTap: () {
+                        if (countryCities.containsKey(option)) {
+                          // If it's a country, show its cities in the dropdown
+                          setState(() {
+                            // Replace the current text with the selected country
+                            controller.text = option;
+                          });
+
+                          // Update the autocomplete field’s options to that country's cities
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            FocusScope.of(context).requestFocus(
+                              FocusNode(),
+                            ); // close current dropdown
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                // reopen autocomplete with city options
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SimpleDialog(
+                                      title: Text("Select City in $option"),
+                                      children: countryCities[option]!.map((
+                                        city,
+                                      ) {
+                                        return SimpleDialogOption(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            setState(() {
+                                              controller.text =
+                                                  "$option - $city";
+                                            });
+                                          },
+                                          child: Text(city),
+                                        );
+                                      }).toList(),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          });
+                        } else {
+                          // If it's already a city, just select it
+                          onSelected(option);
+                          controller.text = option;
+                        }
+                      },
+
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(option),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+        onSelected: (String selection) {
+          controller.text = selection;
+          setState(() {}); // Refresh the other field's options
+        },
+      ),
+    );
+  }
+
+  Widget buildAutocompleteField2(
+    String hint,
+    TextEditingController controller,
+  ) {
+    return Container(
+      width: 300,
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          List<String> options = List<String>.from(countries1);
+          if (textEditingValue.text == '') {
+            return options;
           }
-          return filteredCountries.where(
-            (country) => country.toLowerCase().contains(
+
+          // Exclude the option selected in the other field
+          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
+            options = options.where((c) => c != box5Controller.text).toList();
+          } else if (controller == box5Controller &&
+              box4Controller.text.isNotEmpty) {
+            options = options.where((c) => c != box4Controller.text).toList();
+          }
+
+          return options.where(
+            (option) => option.toLowerCase().contains(
               textEditingValue.text.toLowerCase(),
             ),
           );
@@ -692,7 +941,7 @@ class _Book extends State<Book> {
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 8),
             child: Text(
-              'Total Price: ₱${_selectedPrice}',
+              'Total Price: ₱$_selectedPrice',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

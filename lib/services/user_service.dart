@@ -1,37 +1,35 @@
-class User {
-  final String fullName;
-  final String email;
-  final String address;
-  final String age;
-  final String gender;
-  final String birthdate;
-  final String contactNumber;
-
-  User({
-    required this.fullName,
-    required this.email,
-    required this.address,
-    required this.age,
-    required this.gender,
-    required this.birthdate,
-    required this.contactNumber,
-  });
-}
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class UserService {
   static final UserService _instance = UserService._internal();
   factory UserService() => _instance;
   UserService._internal();
 
-  final List<User> _users = [];
+  final String _baseUrl =
+      "http://your-backend-url/api"; // Replace with your backend URL
 
-  List<User> get users => List.unmodifiable(_users);
+  Future<bool> registerUser(Map<String, dynamic> userData) async {
+    final url = Uri.parse("$_baseUrl/users/register");
 
-  void addUser(User user) {
-    _users.add(user);
-  }
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(userData),
+      );
 
-  void removeUser(String email) {
-    _users.removeWhere((user) => user.email == email);
+      if (response.statusCode == 201) {
+        // Registration successful
+        return true;
+      } else {
+        // Registration failed
+        print("Error: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Exception: $e");
+      return false;
+    }
   }
 }

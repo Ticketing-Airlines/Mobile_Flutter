@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BookingSummaryPage extends StatelessWidget {
-  final Map<String, String> flight;
-  final Map<String, String> guest;
+  final Map<String, dynamic> flight;
+  final Map<String, dynamic> guest;
 
   const BookingSummaryPage({
     super.key,
@@ -105,7 +105,7 @@ class BookingSummaryPage extends StatelessWidget {
                     _detailText("Time", flight["time"]),
                     _detailText(
                       "Price",
-                      flight["price"],
+                      "\$${flight["price"]}",
                       highlight: Colors.greenAccent,
                     ),
                   ],

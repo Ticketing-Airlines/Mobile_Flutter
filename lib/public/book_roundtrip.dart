@@ -3,8 +3,7 @@ import 'package:ticketing_flutter/public/book_oneway.dart';
 import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
-
-const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
+import 'package:ticketing_flutter/services/countries.dart';
 
 class BookRoundtrip extends StatefulWidget {
   const BookRoundtrip({super.key});
@@ -20,8 +19,10 @@ class _BookRoundtrip extends State<BookRoundtrip> {
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
   final TextEditingController box9Controller = TextEditingController();
+
   int _departurePrice = 10000;
   int _arrivalPrice = 10000;
+  int get _totalPrice => _departurePrice + _arrivalPrice;
 
   int _adults = 1;
   int _children = 0;
@@ -35,6 +36,54 @@ class _BookRoundtrip extends State<BookRoundtrip> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+  }
+
+  void _calculatePrice() {
+    if (box6Controller.text.isNotEmpty) {
+      DateTime today = DateTime.now();
+      DateTime pickedDate = DateTime.parse(box6Controller.text);
+      int daysDiff = pickedDate.difference(today).inDays;
+
+      int basePrice = 10000 - (daysDiff * 100);
+      if (basePrice < 2000) basePrice = 2000;
+
+      double multiplier = 1.0;
+      if (_selectedClass == "Business") {
+        multiplier = 3.0;
+      } else if (_selectedClass == "First Class") {
+        multiplier = 6.0;
+      }
+
+      _departurePrice =
+          ((basePrice * _adults +
+                      (basePrice * 0.75 * _children).round() +
+                      (basePrice * 0.10 * _infants).round()) *
+                  multiplier)
+              .round();
+    }
+
+    if (box9Controller.text.isNotEmpty) {
+      DateTime today = DateTime.now();
+      DateTime pickedDate = DateTime.parse(box9Controller.text);
+      int daysDiff = pickedDate.difference(today).inDays;
+
+      int basePrice = 10000 - (daysDiff * 100);
+      if (basePrice < 2000) basePrice = 2000;
+
+      double multiplier = 1.0;
+      if (_selectedClass == "Business") {
+        multiplier = 3.0;
+      } else if (_selectedClass == "First Class") {
+        multiplier = 6.0;
+      }
+
+      _arrivalPrice =
+          ((basePrice * _adults +
+                      (basePrice * 0.75 * _children).round() +
+                      (basePrice * 0.10 * _infants).round()) *
+                  multiplier)
+              .round();
+    }
   }
 
   void _navigateToPage(String boxName, Widget page) {
@@ -74,13 +123,14 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                   }),
                   const SizedBox(height: 10),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 35,
-                    ), // move it higher
+                    padding: const EdgeInsets.only(bottom: 35),
                     child: ElevatedButton(
                       onPressed: () {
                         final total = _adults + _children + _infants;
                         box7Controller.text = "$total Passengers";
+                        this.setState(() {
+                          _calculatePrice();
+                        });
                         Navigator.pop(context);
                       },
                       child: const Text('Done'),
@@ -100,12 +150,19 @@ class _BookRoundtrip extends State<BookRoundtrip> {
       context: context,
       builder: (BuildContext bc) {
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.only(
+            top: 12,
+            left: 20,
+            right: 20,
+            bottom: 50,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _buildClassOption("Economy"),
+              const Divider(),
               _buildClassOption("Business"),
+              const Divider(),
               _buildClassOption("First Class"),
             ],
           ),
@@ -148,6 +205,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
         setState(() {
           _selectedClass = className;
           box8Controller.text = _selectedClass;
+          _calculatePrice();
         });
         Navigator.pop(context);
       },
@@ -299,9 +357,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                   },
                 ),
               ),
-              // Prompt text just above the booking box
               Positioned(
-                top: boxTop - 45, // 45 pixels above the box
+                top: boxTop - 45,
                 left: boxLeft,
                 child: SizedBox(
                   width: boxWidth,
@@ -349,7 +406,6 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                               child: buildClickableBox("One-way"),
                             ),
                             buildClickableBox("Roundtrip", isSelected: true),
-
                             GestureDetector(
                               onTap: () => _navigateToPage(
                                 "Box 3",
@@ -389,13 +445,87 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                             ),
                           ],
                         ),
+
+                        const SizedBox(height: 12),
+
+                        // 🟩 Add total price display here
+                        if (box6Controller.text.isNotEmpty ||
+                            box9Controller.text.isNotEmpty)
+                          Container(
+                            width: 300,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.blue.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Total Price",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "₱$_totalPrice",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1E3A8A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
                         const SizedBox(height: 20),
+
                         GestureDetector(
                           onTapDown: (_) {
                             setState(() => _isSearchPressed = true);
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
+
+                            if (box4Controller.text.isEmpty ||
+                                box5Controller.text.isEmpty ||
+                                box6Controller.text.isEmpty ||
+                                box9Controller.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please fill in all required fields',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
+                            bool isFromValid = box4Controller.text.contains(
+                              " - ",
+                            );
+                            bool isToValid = box5Controller.text.contains(
+                              " - ",
+                            );
+
+                            if (!isFromValid || !isToValid) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a city'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
                             _navigateToPage(
                               "Box 9",
                               const RoundtripFlightsPage(),
@@ -406,16 +536,11 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            width: double.infinity, // w-full
+                            width: double.infinity,
                             height: 56,
                             decoration: BoxDecoration(
                               color: _isSearchPressed
-                                  ? const Color.fromARGB(
-                                      255,
-                                      53,
-                                      56,
-                                      58,
-                                    ) // Slightly darker when pressed
+                                  ? const Color.fromARGB(255, 53, 56, 58)
                                   : const Color.fromARGB(255, 5, 23, 37),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
@@ -427,31 +552,56 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.search,
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Search Flights',
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    size: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Search Flights',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 49,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.copyright,
+                        size: 20,
+                        color: Color.fromARGB(179, 7, 7, 7),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        '2025 Airlines Ticketing. All Rights Reserved',
+                        style: TextStyle(
+                          color: Color.fromARGB(179, 26, 25, 25),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -472,92 +622,182 @@ class _BookRoundtrip extends State<BookRoundtrip> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: Autocomplete<String>(
+      child: RawAutocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty();
+          String input = textEditingValue.text.toLowerCase();
+          List<String> options = [];
+
+          bool isExactCountry = countries1.contains(textEditingValue.text);
+          if (isExactCountry) {
+            String countryName = textEditingValue.text;
+            if (countryCities.containsKey(countryName)) {
+              List<String> cities = countryCities[countryName]!;
+              for (String city in cities) {
+                options.add(city);
+              }
+
+              if (controller == box4Controller &&
+                  box5Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box5Controller.text)
+                    .toList();
+              } else if (controller == box5Controller &&
+                  box4Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box4Controller.text)
+                    .toList();
+              }
+
+              return options;
+            }
           }
-          return countries.where(
-            (country) => country.toLowerCase().contains(
-              textEditingValue.text.toLowerCase(),
-            ),
-          );
-        },
-        onSelected: (String selection) {
-          controller.text = selection;
+
+          List<String> countryOptions = List<String>.from(countries1);
+
+          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
+            countryOptions = countryOptions
+                .where((c) => c != box5Controller.text)
+                .toList();
+          } else if (controller == box5Controller &&
+              box4Controller.text.isNotEmpty) {
+            countryOptions = countryOptions
+                .where((c) => c != box4Controller.text)
+                .toList();
+          }
+
+          return countryOptions;
         },
         fieldViewBuilder:
-            (context, textController, focusNode, onFieldSubmitted) {
+            (context, textEditingController, focusNode, onFieldSubmitted) {
+              if (controller.text.isNotEmpty) {
+                textEditingController.text = controller.text;
+              }
+
               return TextField(
-                controller: textController,
+                controller: textEditingController,
                 focusNode: focusNode,
                 decoration: InputDecoration(
                   hintText: hint,
                   border: InputBorder.none,
                 ),
+                onTap: () {
+                  textEditingController.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: textEditingController.text.length,
+                  );
+                  focusNode.requestFocus();
+                },
+                onChanged: (value) {
+                  controller.text = value;
+                },
               );
             },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4.0,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 200,
+                  maxWidth: 300,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final String option = options.elementAt(index);
+                    return InkWell(
+                      onTap: () {
+                        if (countryCities.containsKey(option)) {
+                          setState(() {
+                            controller.text = option;
+                          });
+
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SimpleDialog(
+                                      title: Text("Select City in $option"),
+                                      children: countryCities[option]!.map((
+                                        city,
+                                      ) {
+                                        return SimpleDialogOption(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            setState(() {
+                                              controller.text =
+                                                  "$option - $city";
+                                            });
+                                          },
+                                          child: Text(city),
+                                        );
+                                      }).toList(),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          });
+                        } else {
+                          onSelected(option);
+                          controller.text = option;
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(option),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+        onSelected: (String selection) {
+          controller.text = selection;
+          setState(() {});
+        },
       ),
     );
   }
 
   Widget buildClickableBox(String label, {bool isSelected = false}) {
-    if (isSelected) {
-      // Black box with white text for "One-way"
-      return Container(
-        width: 93,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return Container(
+      width: 93,
+      height: 50,
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected ? Colors.black : Colors.grey.shade300,
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
-    } else {
-      // White box with black text and subtle shadow for Roundtrip and Multi-City
-      return Container(
-        width: 93,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   Widget buildInputBox(
@@ -638,17 +878,11 @@ class _BookRoundtrip extends State<BookRoundtrip> {
               String formattedDate =
                   "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
               controller.text = formattedDate;
-              int daysDiff = pickedDate.difference(today).inDays;
-              int price = 10000 - (daysDiff * 100);
-              if (price < 5000) price = 5000;
+
               setState(() {
-                if (hint == "Departure") {
-                  _departurePrice = price;
-                } else {
-                  _arrivalPrice = price;
-                }
+                _calculatePrice();
               });
-              // Extra validation: if Arrival is before Departure, reset it
+
               if (hint == "Arrival" &&
                   box6Controller.text.isNotEmpty &&
                   DateTime.tryParse(box6Controller.text) != null) {
@@ -690,8 +924,8 @@ class _BookRoundtrip extends State<BookRoundtrip> {
             padding: const EdgeInsets.only(top: 6, left: 8),
             child: Text(
               hint == "Departure"
-                  ? 'Price: ₱${_departurePrice}'
-                  : 'Price: ₱${_arrivalPrice}',
+                  ? 'Price: ₱$_departurePrice'
+                  : 'Price: ₱$_arrivalPrice',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

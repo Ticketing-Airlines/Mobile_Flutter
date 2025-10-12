@@ -51,197 +51,80 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 30),
 
                 // Full Name input
-                TextField(
+                _buildTextField(
                   controller: fullNameController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Full Name",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.person, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Full Name",
+                  icon: Icons.person,
                 ),
                 const SizedBox(height: 20),
 
                 // Email input
-                TextField(
+                _buildTextField(
                   controller: emailController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Gmail",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.email, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Email",
+                  icon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 20),
 
                 // Address input
-                TextField(
+                _buildTextField(
                   controller: addressController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Address",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(
-                      Icons.location_on,
-                      color: Colors.white,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Address",
+                  icon: Icons.location_on,
                 ),
                 const SizedBox(height: 20),
 
                 // Age input
-                TextField(
+                _buildTextField(
                   controller: ageController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Age",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.cake, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Age",
+                  icon: Icons.cake,
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 20),
 
                 // Gender input
-                TextField(
+                _buildTextField(
                   controller: genderController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Gender",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(
-                      Icons.transgender,
-                      color: Colors.white,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Gender",
+                  icon: Icons.transgender,
                 ),
                 const SizedBox(height: 20),
 
                 // Birthdate input
-                TextField(
+                _buildTextField(
                   controller: birthdateController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Birthdate (YYYY-MM-DD)",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Birthdate (YYYY-MM-DD)",
+                  icon: Icons.calendar_today,
                   keyboardType: TextInputType.datetime,
                 ),
                 const SizedBox(height: 20),
 
                 // Contact Number input
-                TextField(
+                _buildTextField(
                   controller: contactNumberController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Contact Number",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.phone, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  label: "Contact Number",
+                  icon: Icons.phone,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 20),
 
                 // Password input
-                TextField(
+                _buildTextField(
                   controller: passwordController,
+                  label: "Create Password",
+                  icon: Icons.lock,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Create Password",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 20),
 
                 // Confirm Password input
-                TextField(
+                _buildTextField(
                   controller: confirmPasswordController,
+                  label: "Confirm Password",
+                  icon: Icons.lock,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: "Confirm Password",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white70),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.blueAccent),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 30),
 
@@ -259,128 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () async {
-                      String fullName = fullNameController.text.trim();
-                      String email = emailController.text.trim();
-                      String address = addressController.text.trim();
-                      String age = ageController.text.trim();
-                      String gender = genderController.text.trim();
-                      String birthdate = birthdateController.text.trim();
-                      String contactNumber = contactNumberController.text
-                          .trim();
-                      String password = passwordController.text;
-                      String confirmPassword = confirmPasswordController.text;
-
-                      // Validation: Check if any field is empty
-                      if (fullName.isEmpty ||
-                          email.isEmpty ||
-                          address.isEmpty ||
-                          age.isEmpty ||
-                          gender.isEmpty ||
-                          birthdate.isEmpty ||
-                          contactNumber.isEmpty ||
-                          password.isEmpty ||
-                          confirmPassword.isEmpty) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            backgroundColor: const Color(0xFF1E3A8A),
-                            content: SizedBox(
-                              height: 80,
-                              child: Center(
-                                child: Text(
-                                  "Please fill in all fields.",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text(
-                                  "OK",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                        return;
-                      }
-
-                      // Password match validation
-                      if (password != confirmPassword) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text("Password Mismatch"),
-                            content: const Text("Passwords do not match."),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("OK"),
-                              ),
-                            ],
-                          ),
-                        );
-                        return;
-                      }
-                      UserService().addUser(
-                        User(
-                          fullName: fullNameController.text.trim(),
-                          email: emailController.text.trim(),
-                          address: addressController.text.trim(),
-                          age: ageController.text.trim(),
-                          gender: genderController.text.trim(),
-                          birthdate: birthdateController.text.trim(),
-                          contactNumber: contactNumberController.text.trim(),
-                        ),
-                      );
-
-                      // Show dialog in the center
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          content: const SizedBox(
-                            height: 80,
-                            child: Center(
-                              child: Text(
-                                "Account registered successfully!",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-
-                      // Wait for 2 seconds, then close dialog and go back to login
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (mounted) {
-                        Navigator.of(context)
-                          ..pop() // Close the dialog
-                          ..pop(); // Go back to login page
-                      }
-                    },
+                    onPressed: _registerUser,
                     child: const Text(
                       "Register",
                       style: TextStyle(
@@ -420,5 +182,134 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+  }) {
+    return TextField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white70),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.blueAccent),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+    );
+  }
+
+  Future<void> _registerUser() async {
+    String fullName = fullNameController.text.trim();
+    String email = emailController.text.trim();
+    String address = addressController.text.trim();
+    String age = ageController.text.trim();
+    String gender = genderController.text.trim();
+    String birthdate = birthdateController.text.trim();
+    String contactNumber = contactNumberController.text.trim();
+    String password = passwordController.text;
+    String confirmPassword = confirmPasswordController.text;
+
+    // Validation: Check if any field is empty
+    if (fullName.isEmpty ||
+        email.isEmpty ||
+        address.isEmpty ||
+        age.isEmpty ||
+        gender.isEmpty ||
+        birthdate.isEmpty ||
+        contactNumber.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      _showErrorDialog("Please fill in all fields.");
+      return;
+    }
+
+    // Password match validation
+    if (password != confirmPassword) {
+      _showErrorDialog("Passwords do not match.");
+      return;
+    }
+
+    // Prepare user data
+    final userData = {
+      "fullName": fullName,
+      "email": email,
+      "address": address,
+      "age": age,
+      "gender": gender,
+      "birthdate": birthdate,
+      "contactNumber": contactNumber,
+      "password": password,
+    };
+
+    // Call the UserService to register the user
+    final success = await UserService().registerUser(userData);
+
+    if (success) {
+      _showSuccessDialog();
+    } else {
+      _showErrorDialog("An error occurred while registering the account.");
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: const SizedBox(
+          height: 80,
+          child: Center(
+            child: Text(
+              "Account registered successfully!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Wait for 2 seconds, then close dialog and go back to login
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      Navigator.of(context)
+        ..pop() // Close the dialog
+        ..pop(); // Go back to login page
+    }
   }
 }

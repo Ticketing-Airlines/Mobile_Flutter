@@ -3,8 +3,9 @@ import 'package:ticketing_flutter/public/book_roundtrip.dart';
 import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/search_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
-
-const List<String> countries = ["Philippines - Manila", "Japan - Tokyo"];
+import 'package:ticketing_flutter/services/countries.dart';
+import 'package:ticketing_flutter/public/flight_booking_page.dart';
+import 'dart:async';
 
 class BookOneway extends StatefulWidget {
   const BookOneway({super.key});
@@ -33,6 +34,38 @@ class _BookOneway extends State<BookOneway> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+
+    // auto-sliding info bar setup
+  }
+
+  // New function to centralize price calculation
+  void _calculatePrice() {
+    // Only calculate if a date has been picked
+    if (box6Controller.text.isNotEmpty) {
+      DateTime today = DateTime.now();
+      DateTime pickedDate = DateTime.parse(box6Controller.text);
+      int daysDiff = pickedDate.difference(today).inDays;
+
+      // Base price logic (from buildDatePickerField)
+      int basePrice = 10000 - (daysDiff * 100);
+      if (basePrice < 2000) basePrice = 2000;
+
+      // Class multiplier logic (from _buildClassOption)
+      double multiplier = 1.0;
+      if (_selectedClass == "Business") {
+        multiplier = 3.0;
+      } else if (_selectedClass == "First Class") {
+        multiplier = 6.0;
+      }
+
+      // Recalculate and set the new selected price
+      _selectedPrice =
+          ((basePrice * _adults +
+                      (basePrice * 0.75 * _children).round() +
+                      (basePrice * 0.10 * _infants).round()) *
+                  multiplier)
+              .round();
+    }
   }
 
   void _navigateToPage(String boxName, Widget page) {
@@ -77,6 +110,12 @@ class _BookOneway extends State<BookOneway> {
                       onPressed: () {
                         final total = _adults + _children + _infants;
                         box7Controller.text = "$total Passengers";
+
+                        // Update the main state and calculate the new price
+                        this.setState(() {
+                          _calculatePrice();
+                        });
+
                         Navigator.pop(context);
                       },
                       child: const Text('Done'),
@@ -151,6 +190,8 @@ class _BookOneway extends State<BookOneway> {
         setState(() {
           _selectedClass = className;
           box8Controller.text = _selectedClass;
+          // Recalculate price based on class
+          _calculatePrice();
         });
         Navigator.pop(context);
       },
@@ -193,6 +234,12 @@ class _BookOneway extends State<BookOneway> {
               title: const Text('Book', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FlightBookingPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -302,24 +349,6 @@ class _BookOneway extends State<BookOneway> {
                   },
                 ),
               ),
-              // Prompt text just above the booking box
-              Positioned(
-                top: boxTop - 45, // 45 pixels above the box
-                left: boxLeft,
-                child: SizedBox(
-                  width: boxWidth,
-                  child: Center(
-                    child: Text(
-                      'Where do you want to fly?',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 129, 150, 207),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Positioned(
                 top: boxTop,
                 left: boxLeft,
@@ -363,6 +392,7 @@ class _BookOneway extends State<BookOneway> {
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 20),
                         Column(
                           children: [
@@ -392,12 +422,49 @@ class _BookOneway extends State<BookOneway> {
                           ],
                         ),
                         const SizedBox(height: 20),
+                        // 🔹 Updated Search Button
                         GestureDetector(
                           onTapDown: (_) {
                             setState(() => _isSearchPressed = true);
                           },
                           onTapUp: (_) {
                             setState(() => _isSearchPressed = false);
+
+                            // Validation: Check if all required fields are filled
+                            if (box4Controller.text.isEmpty ||
+                                box5Controller.text.isEmpty ||
+                                box6Controller.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please fill in all required fields',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Validate that both country and city are selected for From/To fields
+                            bool isFromValid = box4Controller.text.contains(
+                              " - ",
+                            );
+                            bool isToValid = box5Controller.text.contains(
+                              " - ",
+                            );
+
+                            if (!isFromValid || !isToValid) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a city'),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                              return;
+                            }
+
                             _navigateToPage("Box 9", const SearchFlightsPage());
                           },
                           onTapCancel: () {
@@ -415,7 +482,12 @@ class _BookOneway extends State<BookOneway> {
                                       56,
                                       58,
                                     ) // Slightly darker when pressed
-                                  : const Color.fromARGB(255, 5, 23, 37),
+                                  : const Color.fromARGB(
+                                      255,
+                                      5,
+                                      23,
+                                      37,
+                                    ), // Same as lower drawer half
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -426,26 +498,25 @@ class _BookOneway extends State<BookOneway> {
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                    size: 20,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Search Flights',
+                                  style: TextStyle(
+                                    color: Colors
+                                        .white, // Black text for visibility
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Search Flights',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -454,6 +525,52 @@ class _BookOneway extends State<BookOneway> {
                   ),
                 ),
               ),
+              Positioned(
+                top: boxTop - 45, // 40 pixels above the box
+                left: boxLeft,
+                child: SizedBox(
+                  width: boxWidth,
+                  child: Center(
+                    child: Text(
+                      'Where do you want to fly?',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 129, 150, 207),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 49, // adjust as you like
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.copyright,
+                        size: 20,
+                        color: Color.fromARGB(179, 7, 7, 7),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        '2025 Airlines Ticketing. All Rights Reserved',
+                        style: TextStyle(
+                          color: Color.fromARGB(179, 26, 25, 25),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // BELOW the main white box
             ],
           );
         },
@@ -471,19 +588,206 @@ class _BookOneway extends State<BookOneway> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
       ),
+      child: RawAutocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          String input = textEditingValue.text.toLowerCase();
+          List<String> options = [];
+
+          // Check if the input is a country name (exact match)
+          bool isExactCountry = countries1.contains(textEditingValue.text);
+          if (isExactCountry) {
+            // User has selected a country, show cities for that country
+            String countryName = textEditingValue.text;
+            if (countryCities.containsKey(countryName)) {
+              List<String> cities = countryCities[countryName]!;
+              for (String city in cities) {
+                options.add(city); // Just show city names, not "Country - City"
+              }
+
+              // Exclude the option selected in the other field
+              if (controller == box4Controller &&
+                  box5Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box5Controller.text)
+                    .toList();
+              } else if (controller == box5Controller &&
+                  box4Controller.text.isNotEmpty) {
+                options = options
+                    .where((c) => c != box4Controller.text)
+                    .toList();
+              }
+
+              return options;
+            }
+          }
+
+          // If input is empty or not an exact country match, show countries
+          List<String> countryOptions = List<String>.from(countries1);
+
+          // Exclude the option selected in the other field
+          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
+            countryOptions = countryOptions
+                .where((c) => c != box5Controller.text)
+                .toList();
+          } else if (controller == box5Controller &&
+              box4Controller.text.isNotEmpty) {
+            countryOptions = countryOptions
+                .where((c) => c != box4Controller.text)
+                .toList();
+          }
+
+          return countryOptions;
+        },
+        fieldViewBuilder:
+            (context, textEditingController, focusNode, onFieldSubmitted) {
+              // Update the controller when this widget is first built
+              if (controller.text.isNotEmpty) {
+                textEditingController.text = controller.text;
+              }
+
+              return TextField(
+                controller: textEditingController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: hint,
+                  border: InputBorder.none,
+                ),
+                onTap: () {
+                  // This will force the options to show immediately when field is tapped
+                  textEditingController.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: textEditingController.text.length,
+                  );
+                  // Trigger the options to show by simulating a change
+                  focusNode.requestFocus();
+                },
+                onChanged: (value) {
+                  controller.text = value;
+                },
+              );
+            },
+        optionsViewBuilder: (context, onSelected, options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4.0,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 200,
+                  maxWidth: 300,
+                ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final String option = options.elementAt(index);
+                    return InkWell(
+                      onTap: () {
+                        if (countryCities.containsKey(option)) {
+                          // If it's a country, show its cities in the dropdown
+                          setState(() {
+                            // Replace the current text with the selected country
+                            controller.text = option;
+                          });
+
+                          // Update the autocomplete field’s options to that country's cities
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            FocusScope.of(context).requestFocus(
+                              FocusNode(),
+                            ); // close current dropdown
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                // reopen autocomplete with city options
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SimpleDialog(
+                                      title: Text("Select City in $option"),
+                                      children: countryCities[option]!.map((
+                                        city,
+                                      ) {
+                                        return SimpleDialogOption(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            setState(() {
+                                              controller.text =
+                                                  "$option - $city";
+                                            });
+                                          },
+                                          child: Text(city),
+                                        );
+                                      }).toList(),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          });
+                        } else {
+                          // If it's already a city, just select it
+                          onSelected(option);
+                          controller.text = option;
+                        }
+                      },
+
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(option),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+        onSelected: (String selection) {
+          controller.text = selection;
+          setState(() {}); // Refresh the other field's options
+        },
+      ),
+    );
+  }
+
+  Widget buildAutocompleteField2(
+    String hint,
+    TextEditingController controller,
+  ) {
+    return Container(
+      width: 300,
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
       child: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty();
+          List<String> options = List<String>.from(countries1);
+          if (textEditingValue.text == '') {
+            return options;
           }
-          return countries.where(
-            (country) => country.toLowerCase().contains(
+
+          // Exclude the option selected in the other field
+          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
+            options = options.where((c) => c != box5Controller.text).toList();
+          } else if (controller == box5Controller &&
+              box4Controller.text.isNotEmpty) {
+            options = options.where((c) => c != box4Controller.text).toList();
+          }
+
+          return options.where(
+            (option) => option.toLowerCase().contains(
               textEditingValue.text.toLowerCase(),
             ),
           );
         },
         onSelected: (String selection) {
           controller.text = selection;
+          setState(() {}); // Refresh the other field's options
         },
         fieldViewBuilder:
             (context, textController, focusNode, onFieldSubmitted) {
@@ -501,62 +805,34 @@ class _BookOneway extends State<BookOneway> {
   }
 
   Widget buildClickableBox(String label, {bool isSelected = false}) {
-    if (isSelected) {
-      // Black box with white text for "One-way"
-      return Container(
-        width: 93,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return Container(
+      width: 93,
+      height: 50,
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected ? Colors.black : Colors.grey.shade300,
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
-    } else {
-      // White box with black text and subtle shadow for Roundtrip and Multi-City
-      return Container(
-        width: 93,
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   Widget buildInputBox(
@@ -630,11 +906,10 @@ class _BookOneway extends State<BookOneway> {
               String formattedDate =
                   "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
               controller.text = formattedDate;
-              int daysDiff = pickedDate.difference(today).inDays;
+
+              // Calculate price based on date and current passengers/class
               setState(() {
-                _selectedPrice = 10000 - (daysDiff * 100);
-                if (_selectedPrice < 5000)
-                  _selectedPrice = 5000; // minimum price
+                _calculatePrice();
               });
             }
           },
@@ -659,11 +934,12 @@ class _BookOneway extends State<BookOneway> {
             ),
           ),
         ),
+        // Only show price if a date has been selected
         if (controller.text.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 8),
             child: Text(
-              'Price: ₱${_selectedPrice}',
+              'Total Price: ₱$_selectedPrice',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
