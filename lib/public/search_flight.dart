@@ -3,32 +3,44 @@ import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/public/multi_flight.dart';
 import 'package:ticketing_flutter/services/flight_service.dart';
 import 'package:ticketing_flutter/public/guest_details_page.dart';
+import 'package:ticketing_flutter/services/flight.dart';
+import 'package:ticketing_flutter/public/home.dart';
+import 'package:ticketing_flutter/public/bundle.dart';
 
 class SearchFlightsPage extends StatefulWidget {
-  const SearchFlightsPage({super.key});
+  final String from;
+  final String to;
+  final String departureDate;
+
+  const SearchFlightsPage({
+    super.key,
+    required this.from,
+    required this.to,
+    required this.departureDate,
+  });
 
   @override
-  State<SearchFlightsPage> createState() => _SearchFlightsPage();
+  State<SearchFlightsPage> createState() => _SearchFlightsPageState();
 }
 
-class _SearchFlightsPage extends State<SearchFlightsPage> {
-  // Default selected option
+class _SearchFlightsPageState extends State<SearchFlightsPage> {
   String selectedTripType = "One Way";
-
-  // Trip type options
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
-
-  // Flight service instance
-  final FlightService _flightService = FlightService();
-
-  // Future to hold the fetched flights
-  late Future<List<Map<String, dynamic>>> _flightsFuture;
+  late Future<List<Flight>> _flightsFuture;
 
   @override
   void initState() {
     super.initState();
-    // Fetch flights from the backend
-    _flightsFuture = _flightService.getAvailableFlights();
+    _flightsFuture = _loadFlights();
+  }
+
+  Future<List<Flight>> _loadFlights() async {
+    final flightService = FlightService();
+    return flightService.getFlights(
+      from: widget.from,
+      to: widget.to,
+      departureDate: widget.departureDate,
+    );
   }
 
   void _navigateToPage(String tripType) {
@@ -36,19 +48,30 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
 
     switch (tripType) {
       case "One Way":
-        page = const SearchFlightsPage();
+        page = SearchFlightsPage(
+          from: widget.from,
+          to: widget.to,
+          departureDate: widget.departureDate,
+        );
         break;
       case "Roundtrip":
-        page = const RoundtripFlightsPage();
+        page = const Home();
         break;
       case "Multicity":
-        page = const MultiCitySearchFlightsPage();
+        page = const Home();
         break;
       default:
-        page = const SearchFlightsPage();
+        page = SearchFlightsPage(
+          from: widget.from,
+          to: widget.to,
+          departureDate: widget.departureDate,
+        );
     }
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 
   @override
@@ -57,13 +80,11 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top section: title + dropdown
           Padding(
             padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Title text on the left
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
@@ -81,11 +102,9 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
                     ),
                   ],
                 ),
-
-                // Dropdown on the right
                 DropdownButton<String>(
                   value: selectedTripType,
-                  underline: Container(), // removes default underline
+                  underline: Container(),
                   items: tripTypes.map((String type) {
                     return DropdownMenuItem<String>(
                       value: type,
@@ -96,20 +115,15 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
                     setState(() {
                       selectedTripType = newValue!;
                     });
-
-                    // Navigate to respective page
                     _navigateToPage(newValue!);
                   },
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // Flights list - fetched dynamically
           Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
+            child: FutureBuilder<List<Flight>>(
               future: _flightsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -132,12 +146,12 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
                           Icons.flight_takeoff,
                           color: Colors.blue,
                         ),
-                        title: Text("${flight["from"]} → ${flight["to"]}"),
+                        title: Text("${flight.from} → ${flight.to}"),
                         subtitle: Text(
-                          "${flight["airline"]}\nDate: ${flight["date"]}  Time: ${flight["time"]}",
+                          "${flight.airline}\nDate: ${flight.date}  Time: ${flight.time}",
                         ),
                         trailing: Text(
-                          "\$${flight["price"]}",
+                          "₱${flight.price}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
@@ -149,7 +163,7 @@ class _SearchFlightsPage extends State<SearchFlightsPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  GuestDetailsPage(flight: flight),
+                                  FlightBundlesPage(flight: flight),
                             ),
                           );
                         },

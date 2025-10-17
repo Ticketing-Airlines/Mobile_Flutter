@@ -2,179 +2,194 @@ import 'package:flutter/material.dart';
 
 class BookingSummaryPage extends StatelessWidget {
   final Map<String, dynamic> flight;
+  final Map<String, dynamic> bundle;
   final Map<String, dynamic> guest;
 
   const BookingSummaryPage({
     super.key,
     required this.flight,
+    required this.bundle,
     required this.guest,
   });
-
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF0D1B2A), // dark navy dialog
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: SizedBox(
-          width: 700, // <-- Make the dialog wider here
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.check_circle, color: Colors.greenAccent, size: 70),
-              SizedBox(height: 16),
-              Text(
-                "Booking Confirmed!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Your booking has been successfully saved.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          Center(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("OK"),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A), // dark blue background
+      backgroundColor: const Color(0xFFF3F4F6), // light gray background
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1B263B), // darker navy
-        title: const Text(
-          'Booking Summary',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        backgroundColor: const Color(0xFF0288D1), // Cebu Pacific blue
+        title: const Text("Booking Summary"),
         centerTitle: true,
-        elevation: 2,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Flight Details Card
-            Card(
-              color: const Color(0xFF1B263B), // dark card
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+            // White card
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "✈️ Flight Details",
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${flight["from"]} – ${flight["to"]}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0288D1),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    flight["date"] ?? "",
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "${guest["firstName"]} ${guest["lastName"]}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    bundle["name"],
+                    style: const TextStyle(color: Colors.black87),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    "Seat: Unassigned, Unassigned",
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  const Divider(height: 32, thickness: 1.2),
+                  const Text(
+                    "Taxes and Fees",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _priceRow("Base Fare", "PHP 3,471.44"),
+                  _priceRow("Travel Insurance", "PHP 525.00"),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {}, // can show detailed breakdown
+                    child: const Text(
+                      "Show details",
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.lightBlueAccent,
+                        color: Color(0xFF0288D1),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    _detailText("From", flight["from"]),
-                    _detailText("To", flight["to"]),
-                    _detailText("Airline", flight["airline"]),
-                    _detailText("Date", flight["date"]),
-                    _detailText("Time", flight["time"]),
-                    _detailText(
-                      "Price",
-                      "\$${flight["price"]}",
-                      highlight: Colors.greenAccent,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                  const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
-
-            // Passenger Details Card
-            Card(
-              color: const Color(0xFF1B263B),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "🧍 Passenger Details",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.lightBlueAccent,
+                  // Total bar
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFF176), // yellow bar
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    _detailText("Title", guest["title"]),
-                    _detailText(
-                      "Name",
-                      "${guest["firstName"] ?? ""} "
-                          "${guest["middleName"] ?? ""} "
-                          "${guest["lastName"] ?? ""}",
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 12,
                     ),
-                    _detailText("Date of Birth", guest["dob"]),
-                    _detailText("Gender", guest["gender"]),
-                    _detailText("Nationality", guest["nationality"]),
-                    _detailText("Passport No.", guest["passport"]),
-                    _detailText("Passport Expiry", guest["passportExpiry"]),
-                    _detailText("Contact", guest["contact"]),
-                    _detailText("Email", guest["email"]),
-                  ],
-                ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          "PHP 3,996.44",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
 
             const SizedBox(height: 30),
 
-            // Confirm Button
-            SizedBox(
+            // Confirmation checkbox + button
+            Container(
               width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlueAccent,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Icon(Icons.check_box_outline_blank),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "By clicking 'Continue' I confirm that I have read, understood, "
+                          "and accept the Conditions of Carriage",
+                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                      ),
+                    ],
                   ),
-                  elevation: 4,
-                ),
-                onPressed: () => _showConfirmationDialog(context),
-                child: const Text(
-                  "Confirm Booking",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0288D1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text(
+                        "Continue",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -183,17 +198,15 @@ class BookingSummaryPage extends StatelessWidget {
     );
   }
 
-  // Helper widget for details with consistent style
-  Widget _detailText(String label, String? value, {Color? highlight}) {
+  Widget _priceRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        "$label: ${value ?? "-"}",
-        style: TextStyle(
-          fontSize: 16,
-          color: highlight ?? Colors.white,
-          fontWeight: highlight != null ? FontWeight.bold : FontWeight.normal,
-        ),
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.black87)),
+          Text(value, style: const TextStyle(color: Colors.black87)),
+        ],
       ),
     );
   }
