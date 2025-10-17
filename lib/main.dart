@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/home.dart';
+import 'package:ticketing_flutter/public/bundle.dart';
+import 'package:ticketing_flutter/public/about.dart';
 
 void main() {
   runApp(const MyApp());

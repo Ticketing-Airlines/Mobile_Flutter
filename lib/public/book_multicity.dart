@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/book_oneway.dart';
 import 'package:ticketing_flutter/public/book_roundtrip.dart';
-import 'package:ticketing_flutter/public/multi_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
+import 'package:ticketing_flutter/public/home.dart';
 
 const List<String> countries = [
   "Philippines - Manila",
@@ -417,7 +417,7 @@ class _BookMulticityState extends State<BookMulticity> {
                               PageRouteBuilder(
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        const MultiCitySearchFlightsPage(),
+                                        const Home(),
                                 transitionsBuilder:
                                     (
                                       context,

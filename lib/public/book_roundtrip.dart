@@ -4,6 +4,7 @@ import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/roundtrip_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/countries.dart';
+import 'package:ticketing_flutter/public/home.dart';
 
 class BookRoundtrip extends StatefulWidget {
   const BookRoundtrip({super.key});
@@ -526,10 +527,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                               return;
                             }
 
-                            _navigateToPage(
-                              "Box 9",
-                              const RoundtripFlightsPage(),
-                            );
+                            _navigateToPage("Box 9", const Home());
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);

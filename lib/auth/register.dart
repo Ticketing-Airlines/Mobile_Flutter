@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/user_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -10,13 +9,13 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController middleNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
-  final TextEditingController ageController = TextEditingController();
-  final TextEditingController genderController = TextEditingController();
-  final TextEditingController birthdateController = TextEditingController();
   final TextEditingController contactNumberController = TextEditingController();
+  final TextEditingController birthdateController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
@@ -38,25 +37,48 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.person_add, size: 80, color: Colors.white),
-                const SizedBox(height: 15),
-                const Text(
-                  "User Registration",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.person_add, size: 40, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text(
+                      "User Registration",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 0.5),
+
                 const SizedBox(height: 30),
 
-                // Full Name input
+                // First Name input
                 _buildTextField(
-                  controller: fullNameController,
-                  label: "Full Name",
+                  controller: firstNameController,
+                  label: "First Name",
                   icon: Icons.person,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+
+                // Middle Name input
+                _buildTextField(
+                  controller: middleNameController,
+                  label: "Middle Name",
+                  icon: Icons.person,
+                ),
+                const SizedBox(height: 10),
+
+                // Last Name input
+                _buildTextField(
+                  controller: lastNameController,
+                  label: "Last Name",
+                  icon: Icons.person,
+                ),
+                const SizedBox(height: 10),
 
                 // Email input
                 _buildTextField(
@@ -65,41 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 20),
-
-                // Address input
-                _buildTextField(
-                  controller: addressController,
-                  label: "Address",
-                  icon: Icons.location_on,
-                ),
-                const SizedBox(height: 20),
-
-                // Age input
-                _buildTextField(
-                  controller: ageController,
-                  label: "Age",
-                  icon: Icons.cake,
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 20),
-
-                // Gender input
-                _buildTextField(
-                  controller: genderController,
-                  label: "Gender",
-                  icon: Icons.transgender,
-                ),
-                const SizedBox(height: 20),
-
-                // Birthdate input
-                _buildTextField(
-                  controller: birthdateController,
-                  label: "Birthdate (YYYY-MM-DD)",
-                  icon: Icons.calendar_today,
-                  keyboardType: TextInputType.datetime,
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Contact Number input
                 _buildTextField(
@@ -108,7 +96,90 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: Icons.phone,
                   keyboardType: TextInputType.phone,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+
+                // Birthdate input
+                // Birthdate input (with date picker)
+                GestureDetector(
+                  onTap: () async {
+                    FocusScope.of(
+                      context,
+                    ).requestFocus(FocusNode()); // hide keyboard
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(2000),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.dark(
+                              primary: Colors.blueAccent,
+                              onPrimary: Color.fromARGB(255, 2, 2, 2),
+                              surface: Color.fromARGB(255, 187, 222, 251),
+                              onSurface: Color.fromARGB(255, 3, 3, 3),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (pickedDate != null) {
+                      setState(() {
+                        birthdateController.text =
+                            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                      });
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: _buildTextField(
+                      controller: birthdateController,
+                      label: "Birthdate",
+                      icon: Icons.calendar_today,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Gender input
+                // Gender dropdown
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white70),
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    dropdownColor: const Color(0xFF111827),
+                    value: genderController.text.isEmpty
+                        ? null
+                        : genderController.text,
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.white,
+                    ),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.transgender, color: Colors.white),
+                      labelText: "Gender",
+                      labelStyle: TextStyle(color: Colors.white70),
+                      border: InputBorder.none,
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                    items: const [
+                      DropdownMenuItem(value: "Male", child: Text("Male")),
+                      DropdownMenuItem(value: "Female", child: Text("Female")),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        genderController.text = value!;
+                      });
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
 
                 // Password input
                 _buildTextField(
@@ -117,7 +188,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: Icons.lock,
                   obscureText: true,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Confirm Password input
                 _buildTextField(
@@ -126,7 +197,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   icon: Icons.lock,
                   obscureText: true,
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
 
                 // Register button
                 SizedBox(
@@ -152,7 +223,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Login option
                 Row(
@@ -213,24 +284,24 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _registerUser() async {
-    String fullName = fullNameController.text.trim();
+    String firstName = firstNameController.text.trim();
+    String middleName = middleNameController.text.trim();
+    String lastName = lastNameController.text.trim();
     String email = emailController.text.trim();
-    String address = addressController.text.trim();
-    String age = ageController.text.trim();
-    String gender = genderController.text.trim();
-    String birthdate = birthdateController.text.trim();
     String contactNumber = contactNumberController.text.trim();
+    String birthdate = birthdateController.text.trim();
+    String gender = genderController.text.trim();
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
     // Validation: Check if any field is empty
-    if (fullName.isEmpty ||
+    if (firstName.isEmpty ||
+        middleName.isEmpty ||
+        lastName.isEmpty ||
         email.isEmpty ||
-        address.isEmpty ||
-        age.isEmpty ||
-        gender.isEmpty ||
-        birthdate.isEmpty ||
         contactNumber.isEmpty ||
+        birthdate.isEmpty ||
+        gender.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
       _showErrorDialog("Please fill in all fields.");
@@ -245,13 +316,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // Prepare user data
     final userData = {
-      "fullName": fullName,
+      "firstName": firstName,
+      "middleName": middleName,
+      "lastName": lastName,
       "email": email,
-      "address": address,
-      "age": age,
-      "gender": gender,
-      "birthdate": birthdate,
       "contactNumber": contactNumber,
+      "birthdate": birthdate,
+      "gender": gender,
       "password": password,
     };
 

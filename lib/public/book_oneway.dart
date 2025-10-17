@@ -18,7 +18,6 @@ class _BookOneway extends State<BookOneway> {
   final TextEditingController box4Controller = TextEditingController();
   final TextEditingController box5Controller = TextEditingController();
   final TextEditingController box6Controller = TextEditingController();
-  int _selectedPrice = 10000;
   final TextEditingController box7Controller = TextEditingController();
   final TextEditingController box8Controller = TextEditingController();
 
@@ -26,6 +25,12 @@ class _BookOneway extends State<BookOneway> {
   int _children = 0;
   int _infants = 0;
   String _selectedClass = "Economy";
+  int _selectedPrice = 0;
+  int _departurePrice = 2000; // Default price below Departure
+  bool _isTotalPriceManual = false; // new flag
+  String _selectedTripType = "One-way"; // Default selection
+
+  bool _hasSelectedPassengers = false;
 
   bool _isSearchPressed = false;
 
@@ -34,37 +39,34 @@ class _BookOneway extends State<BookOneway> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+    _calculatePrice(); // Calculate price initially
 
     // auto-sliding info bar setup
   }
 
   // New function to centralize price calculation
   void _calculatePrice() {
-    // Only calculate if a date has been picked
     if (box6Controller.text.isNotEmpty) {
-      DateTime today = DateTime.now();
       DateTime pickedDate = DateTime.parse(box6Controller.text);
-      int daysDiff = pickedDate.difference(today).inDays;
+      int daysDiff = pickedDate.difference(DateTime.now()).inDays;
 
-      // Base price logic (from buildDatePickerField)
       int basePrice = 10000 - (daysDiff * 100);
       if (basePrice < 2000) basePrice = 2000;
 
-      // Class multiplier logic (from _buildClassOption)
       double multiplier = 1.0;
-      if (_selectedClass == "Business") {
+      if (_selectedClass == "Business")
         multiplier = 3.0;
-      } else if (_selectedClass == "First Class") {
+      else if (_selectedClass == "First Class")
         multiplier = 6.0;
-      }
 
-      // Recalculate and set the new selected price
       _selectedPrice =
           ((basePrice * _adults +
                       (basePrice * 0.75 * _children).round() +
                       (basePrice * 0.10 * _infants).round()) *
                   multiplier)
               .round();
+    } else {
+      _selectedPrice = 2000;
     }
   }
 
@@ -111,13 +113,18 @@ class _BookOneway extends State<BookOneway> {
                         final total = _adults + _children + _infants;
                         box7Controller.text = "$total Passengers";
 
-                        // Update the main state and calculate the new price
+                        setState(() {
+                          _hasSelectedPassengers = true;
+                        });
+
+                        // Update total price
                         this.setState(() {
                           _calculatePrice();
                         });
 
                         Navigator.pop(context);
                       },
+
                       child: const Text('Done'),
                     ),
                   ),
@@ -375,24 +382,11 @@ class _BookOneway extends State<BookOneway> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            buildClickableBox("One-way", isSelected: true),
-                            GestureDetector(
-                              onTap: () => _navigateToPage(
-                                "Box 2",
-                                const BookRoundtrip(),
-                              ),
-                              child: buildClickableBox("Roundtrip"),
-                            ),
-                            GestureDetector(
-                              onTap: () => _navigateToPage(
-                                "Box 3",
-                                const BookMulticity(),
-                              ),
-                              child: buildClickableBox("Multi-City"),
-                            ),
+                            buildClickableBox("One-way", false),
+                            buildClickableBox("Roundtrip", true),
+                            buildClickableBox("Multi-City", true),
                           ],
                         ),
-
                         const SizedBox(height: 20),
                         Column(
                           children: [
@@ -404,24 +398,52 @@ class _BookOneway extends State<BookOneway> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Column(
                           children: [
-                            buildInputBox(
-                              "Passengers",
-                              box7Controller,
-                              width: 140,
-                              readOnly: true,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    buildInputBox(
+                                      "Passengers",
+                                      box7Controller,
+                                      width: 140,
+                                      readOnly: true,
+                                    ),
+                                    buildInputBox(
+                                      "Class",
+                                      box8Controller,
+                                      width: 140,
+                                      readOnly: true,
+                                    ),
+                                  ],
+                                ),
+                                // 🔹 Show total price only if the user has selected passengers
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 6,
+                                    left: 8,
+                                  ),
+                                  child: Text(
+                                    'Total Price: ₱$_selectedPrice',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1E3A8A),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            buildInputBox(
-                              "Class",
-                              box8Controller,
-                              width: 140,
-                              readOnly: true,
-                            ),
+
+                            // 🔹 Show total price only after passengers are selected
                           ],
                         ),
-                        const SizedBox(height: 20),
+
+                        const SizedBox(height: 15),
                         // 🔹 Updated Search Button
                         GestureDetector(
                           onTapDown: (_) {
@@ -465,7 +487,16 @@ class _BookOneway extends State<BookOneway> {
                               return;
                             }
 
-                            _navigateToPage("Box 9", const SearchFlightsPage());
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SearchFlightsPage(
+                                  from: box4Controller.text,
+                                  to: box5Controller.text,
+                                  departureDate: box6Controller.text,
+                                ),
+                              ),
+                            );
                           },
                           onTapCancel: () {
                             setState(() => _isSearchPressed = false);
@@ -804,31 +835,50 @@ class _BookOneway extends State<BookOneway> {
     );
   }
 
-  Widget buildClickableBox(String label, {bool isSelected = false}) {
-    return Container(
-      width: 93,
-      height: 50,
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected ? Colors.black : Colors.grey.shade300,
+  Widget buildClickableBox(String label, bool isClickable) {
+    bool isSelected = _selectedTripType == label;
+
+    return GestureDetector(
+      onTap: isClickable
+          ? () {
+              setState(() {
+                _selectedTripType = label;
+              });
+              if (label == "Roundtrip") {
+                _navigateToPage("Box 2", const BookRoundtrip());
+              } else if (label == "Multi-City") {
+                _navigateToPage("Box 3", const BookMulticity());
+              }
+            }
+          : null,
+      child: Container(
+        width: 93,
+        height: 50,
+        decoration: BoxDecoration(
+          color: label == "One-way"
+              ? Colors
+                    .black // Change color of One-way box
+              : (isSelected ? Colors.black : Colors.white),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: (label == "One-way" || isSelected)
+                  ? Colors.white
+                  : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -907,9 +957,12 @@ class _BookOneway extends State<BookOneway> {
                   "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
               controller.text = formattedDate;
 
-              // Calculate price based on date and current passengers/class
+              // Calculate price for Departure field only
               setState(() {
-                _calculatePrice();
+                int daysDiff = pickedDate.difference(DateTime.now()).inDays;
+                _departurePrice = 10000 - (daysDiff * 100);
+                if (_departurePrice < 2000) _departurePrice = 2000;
+                _calculatePrice(); // Add this line to update total price
               });
             }
           },
@@ -935,18 +988,17 @@ class _BookOneway extends State<BookOneway> {
           ),
         ),
         // Only show price if a date has been selected
-        if (controller.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 8),
-            child: Text(
-              'Total Price: ₱$_selectedPrice',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
-              ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, left: 8),
+          child: Text(
+            'Price: ₱$_departurePrice', // <-- use the new variable
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E3A8A),
             ),
           ),
+        ),
       ],
     );
   }
