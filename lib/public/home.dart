@@ -95,7 +95,7 @@ class _HomeState extends State<Home> {
                     shape: BoxShape.circle, // Makes it circular
                   ),
                   child: Icon(
-                    Icons.flight,
+                    Icons.flight_takeoff,
                     color: Colors.white, // White airplane icon
                     size: 24, // Slightly smaller to fit in circle
                   ),

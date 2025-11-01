@@ -27,7 +27,7 @@ class FlightService {
         from: "Japan - Tokyo",
         to: "Japan - Osaka",
         airline: "Delta Airlines",
-        date: "2025-10-25",
+        date: "2025-10-29",
         time: "10:00 PM",
         price: 40000,
       ),

@@ -7,6 +7,10 @@ import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/countries.dart';
 import 'package:ticketing_flutter/public/flight_booking_page.dart';
 import 'package:ticketing_flutter/public/about.dart';
+import 'package:ticketing_flutter/public/explore.dart';
+import 'package:ticketing_flutter/public/travel_info.dart';
+import 'package:ticketing_flutter/public/manage.dart';
+
 import 'dart:async';
 
 class Book extends StatefulWidget {
@@ -258,6 +262,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const ManagePage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -268,6 +280,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const TravelInfoPage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -278,6 +298,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const ExplorePage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -287,7 +315,11 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const About(),
+                    transitionDuration: Duration.zero,
+                  ),
                 );
               },
             ),
@@ -298,7 +330,11 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const LoginPage(),
+                    transitionDuration: Duration.zero,
+                  ),
                 );
               },
             ),
