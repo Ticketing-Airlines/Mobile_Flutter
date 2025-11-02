@@ -16,7 +16,7 @@ class _ManagePageState extends State<ManagePage> with TickerProviderStateMixin {
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
     )..forward();
 
     _fadeAnimation = CurvedAnimation(

@@ -17,7 +17,7 @@ class _ExplorePage extends State<ExplorePage> with TickerProviderStateMixin {
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 1),
     )..forward();
 
     _fadeAnimation = CurvedAnimation(
@@ -112,12 +112,12 @@ class _ExplorePage extends State<ExplorePage> with TickerProviderStateMixin {
                   children: const [
                     // Note: Same imagePath but different title creates a unique Hero tag
                     DestinationCard(
-                      imagePath: 'assets/singapore.webp',
+                      imagePath: 'assets/boracay.webp',
                       title: 'Boracay',
                       subtitle: 'White Beach Paradise',
                     ),
                     DestinationCard(
-                      imagePath: 'assets/singapore.webp',
+                      imagePath: 'assets/palawan.webp',
                       title: 'Palawan',
                       subtitle: 'The Last Frontier',
                     ),
@@ -127,7 +127,7 @@ class _ExplorePage extends State<ExplorePage> with TickerProviderStateMixin {
                       subtitle: 'Surfing Capital',
                     ),
                     DestinationCard(
-                      imagePath: 'assets/singapore.webp',
+                      imagePath: 'assets/bohol.webp',
                       title: 'Bohol',
                       subtitle: 'Chocolate Hills',
                     ),
