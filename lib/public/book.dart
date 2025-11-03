@@ -5,8 +5,12 @@ import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/search_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/countries.dart';
-import 'package:ticketing_flutter/public/flight_booking_page.dart';
 import 'package:ticketing_flutter/public/about.dart';
+import 'package:ticketing_flutter/public/explore.dart';
+import 'package:ticketing_flutter/public/travel_info.dart';
+import 'package:ticketing_flutter/public/manage/manage.dart';
+import 'package:ticketing_flutter/public/bookpage.dart';
+
 import 'dart:async';
 
 class Book extends StatefulWidget {
@@ -29,7 +33,7 @@ class _Book extends State<Book> {
   String _selectedClass = "Economy";
   int _selectedPrice = 0;
   int _departurePrice = 2000; // Default price below Departure
-  bool _isTotalPriceManual = false; // new flag
+  final bool _isTotalPriceManual = false; // new flag
 
   bool _hasSelectedPassengers = false;
 
@@ -55,9 +59,9 @@ class _Book extends State<Book> {
       if (basePrice < 2000) basePrice = 2000;
 
       double multiplier = 1.0;
-      if (_selectedClass == "Business")
+      if (_selectedClass == "Business") {
         multiplier = 3.0;
-      else if (_selectedClass == "First Class")
+      } else if (_selectedClass == "First Class")
         multiplier = 6.0;
 
       _selectedPrice =
@@ -244,8 +248,10 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const FlightBookingPage(),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const FlightBookingApp(),
+                    transitionDuration: Duration.zero,
                   ),
                 );
               },
@@ -258,6 +264,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const ManagePage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -268,6 +282,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const TravelInfoPage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -278,6 +300,14 @@ class _Book extends State<Book> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const ExplorePage(),
+                    transitionDuration: Duration.zero,
+                  ),
+                );
               },
             ),
             ListTile(
@@ -287,7 +317,11 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const About(),
+                    transitionDuration: Duration.zero,
+                  ),
                 );
               },
             ),
@@ -298,7 +332,11 @@ class _Book extends State<Book> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) =>
+                        const LoginPage(),
+                    transitionDuration: Duration.zero,
+                  ),
                 );
               },
             ),

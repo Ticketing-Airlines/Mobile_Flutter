@@ -4,7 +4,12 @@ import 'package:ticketing_flutter/public/book_multicity.dart';
 import 'package:ticketing_flutter/public/search_flight.dart';
 import 'package:ticketing_flutter/auth/login.dart';
 import 'package:ticketing_flutter/services/countries.dart';
-import 'package:ticketing_flutter/public/flight_booking_page.dart';
+import 'package:ticketing_flutter/public/manage/manage.dart';
+import 'package:ticketing_flutter/public/bookpage.dart';
+import 'package:ticketing_flutter/public/travel_info.dart';
+import 'package:ticketing_flutter/public/explore.dart';
+import 'package:ticketing_flutter/public/about.dart';
+
 import 'dart:async';
 
 class BookOneway extends StatefulWidget {
@@ -27,7 +32,7 @@ class _BookOneway extends State<BookOneway> {
   String _selectedClass = "Economy";
   int _selectedPrice = 0;
   int _departurePrice = 2000; // Default price below Departure
-  bool _isTotalPriceManual = false; // new flag
+  final bool _isTotalPriceManual = false; // new flag
   String _selectedTripType = "One-way"; // Default selection
 
   bool _hasSelectedPassengers = false;
@@ -54,9 +59,9 @@ class _BookOneway extends State<BookOneway> {
       if (basePrice < 2000) basePrice = 2000;
 
       double multiplier = 1.0;
-      if (_selectedClass == "Business")
+      if (_selectedClass == "Business") {
         multiplier = 3.0;
-      else if (_selectedClass == "First Class")
+      } else if (_selectedClass == "First Class")
         multiplier = 6.0;
 
       _selectedPrice =
@@ -244,7 +249,7 @@ class _BookOneway extends State<BookOneway> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FlightBookingPage(),
+                    builder: (context) => const FlightBookingApp(),
                   ),
                 );
               },
@@ -257,6 +262,10 @@ class _BookOneway extends State<BookOneway> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ManagePage()),
+                );
               },
             ),
             ListTile(
@@ -267,6 +276,12 @@ class _BookOneway extends State<BookOneway> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TravelInfoPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -277,6 +292,10 @@ class _BookOneway extends State<BookOneway> {
               ),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ExplorePage()),
+                );
               },
             ),
             ListTile(
@@ -284,6 +303,10 @@ class _BookOneway extends State<BookOneway> {
               title: const Text('About', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const About()),
+                );
               },
             ),
             ListTile(
