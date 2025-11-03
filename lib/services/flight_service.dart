@@ -11,7 +11,7 @@ class FlightService {
         from: "Philippines - Manila",
         to: "Philippines - Cebu",
         airline: "Philippine Airlines",
-        date: "2025-10-20",
+        date: "2025-11-20",
         time: "08:00 AM",
         price: 25000,
       ),
