@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ticketing_flutter/public/bookpage.dart';
 
 class About extends StatefulWidget {
   const About({super.key});
@@ -7,30 +8,7 @@ class About extends StatefulWidget {
   State<About> createState() => _About();
 }
 
-class _About extends State<About> with TickerProviderStateMixin {
-  late final AnimationController _fadeController;
-  late final Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..forward();
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
+class _About extends State<About> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,69 +52,72 @@ class _About extends State<About> with TickerProviderStateMixin {
 
                   // Title and Button
                   Positioned.fill(
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.flight_takeoff,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.flight_takeoff,
+                          color: Colors.white,
+                          size: 100,
+                        ),
+                        const SizedBox(height: 15),
+                        const Text(
+                          "Airlines Ticketing",
+                          style: TextStyle(
                             color: Colors.white,
-                            size: 100,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(0, 2),
+                                blurRadius: 8,
+                                color: Colors.blueAccent,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 15),
-                          const Text(
-                            "Airlines Ticketing",
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Your Journey Begins Here",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 18,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 35,
+                              vertical: 15,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 6,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const FlightBookingApp(),
+                              ),
+                            );
+                          },
+
+                          child: const Text(
+                            "Book Now",
                             style: TextStyle(
+                              fontSize: 16,
                               color: Colors.white,
-                              fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(0, 2),
-                                  blurRadius: 8,
-                                  color: Colors.blueAccent,
-                                ),
-                              ],
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            "Your Journey Begins Here",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 18,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 35,
-                                vertical: 15,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              elevation: 6,
-                            ),
-                            onPressed: () {
-                              // Navigate or scroll
-                            },
-                            child: const Text(
-                              "Book Now",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -145,73 +126,67 @@ class _About extends State<About> with TickerProviderStateMixin {
               const SizedBox(height: 30),
 
               // ✨ Body Content
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      _buildCardSection(
-                        "Who We Are",
-                        "Airlines Ticketing is a modern flight ticketing platform dedicated to making air travel more accessible, affordable, and stress-free. Whether you're booking a business trip, family vacation, or spontaneous getaway, our goal is to make your journey smooth from takeoff to landing.",
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _buildCardSection(
+                      "Who We Are",
+                      "Airlines Ticketing is a modern flight ticketing platform dedicated to making air travel more accessible, affordable, and stress-free. Whether you're booking a business trip, family vacation, or spontaneous getaway, our goal is to make your journey smooth from takeoff to landing.",
+                    ),
+                    _buildCardSection(
+                      "Our Mission",
+                      "We aim to connect people across destinations by offering reliable booking services, transparent pricing, and exceptional customer support — all in one easy-to-use app.",
+                    ),
+                    const SizedBox(height: 10),
+                    _buildSectionTitle("What We Offer"),
+                    const SizedBox(height: 10),
+                    _buildFeatureCard(
+                      Icons.airplane_ticket,
+                      "Easy & Secure Flight Booking",
+                      "Book one-way, round-trip, or multi-city flights in just a few taps.",
+                    ),
+                    _buildFeatureCard(
+                      Icons.attach_money,
+                      "Transparent Pricing",
+                      "No hidden fees — what you see is what you pay.",
+                    ),
+                    _buildFeatureCard(
+                      Icons.support_agent,
+                      "24/7 Customer Support",
+                      "We’re always here to assist you before, during, and after your flight.",
+                    ),
+                    _buildFeatureCard(
+                      Icons.event_available,
+                      "Flexible Travel Options",
+                      "Easily modify or cancel bookings when plans change.",
+                    ),
+                    const SizedBox(height: 20),
+                    _buildCardSection(
+                      "Our Vision",
+                      "To become the most trusted digital airline ticketing service — bridging distances, one flight at a time.",
+                    ),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle("Contact Us"),
+                    const SizedBox(height: 10),
+                    _buildContactRow(
+                      Icons.email_outlined,
+                      "support@airlinesticketing.com",
+                    ),
+                    _buildContactRow(Icons.phone_outlined, "+63 900 123 4567"),
+                    _buildContactRow(
+                      Icons.location_on_outlined,
+                      "Makati City, Philippines",
+                    ),
+                    const SizedBox(height: 40),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 40),
+                      child: const Text(
+                        "© 2025 Airlines Ticketing. All rights reserved.",
+                        style: TextStyle(color: Colors.white60, fontSize: 13),
                       ),
-                      _buildCardSection(
-                        "Our Mission",
-                        "We aim to connect people across destinations by offering reliable booking services, transparent pricing, and exceptional customer support — all in one easy-to-use app.",
-                      ),
-                      const SizedBox(height: 10),
-                      _buildSectionTitle("What We Offer"),
-                      const SizedBox(height: 10),
-                      _buildFeatureCard(
-                        Icons.airplane_ticket,
-                        "Easy & Secure Flight Booking",
-                        "Book one-way, round-trip, or multi-city flights in just a few taps.",
-                      ),
-                      _buildFeatureCard(
-                        Icons.attach_money,
-                        "Transparent Pricing",
-                        "No hidden fees — what you see is what you pay.",
-                      ),
-                      _buildFeatureCard(
-                        Icons.support_agent,
-                        "24/7 Customer Support",
-                        "We’re always here to assist you before, during, and after your flight.",
-                      ),
-                      _buildFeatureCard(
-                        Icons.event_available,
-                        "Flexible Travel Options",
-                        "Easily modify or cancel bookings when plans change.",
-                      ),
-                      const SizedBox(height: 20),
-                      _buildCardSection(
-                        "Our Vision",
-                        "To become the most trusted digital airline ticketing service — bridging distances, one flight at a time.",
-                      ),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("Contact Us"),
-                      const SizedBox(height: 10),
-                      _buildContactRow(
-                        Icons.email_outlined,
-                        "support@airlinesticketing.com",
-                      ),
-                      _buildContactRow(
-                        Icons.phone_outlined,
-                        "+63 900 123 4567",
-                      ),
-                      _buildContactRow(
-                        Icons.location_on_outlined,
-                        "Makati City, Philippines",
-                      ),
-                      const SizedBox(height: 40),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 40),
-                        child: const Text(
-                          "© 2025 Airlines Ticketing. All rights reserved.",
-                          style: TextStyle(color: Colors.white60, fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
