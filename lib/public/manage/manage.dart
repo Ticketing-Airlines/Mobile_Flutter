@@ -7,30 +7,7 @@ class ManagePage extends StatefulWidget {
   State<ManagePage> createState() => _ManagePageState();
 }
 
-class _ManagePageState extends State<ManagePage> with TickerProviderStateMixin {
-  late final AnimationController _fadeController;
-  late final Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..forward();
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
+class _ManagePageState extends State<ManagePage> {
   void _showCheckInContent() {
     showDialog(
       context: context,
@@ -340,147 +317,144 @@ class _ManagePageState extends State<ManagePage> with TickerProviderStateMixin {
             colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
           ),
         ),
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: MediaQuery.of(context).padding.top + 20,
-              bottom: MediaQuery.of(context).padding.bottom,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                const Text(
-                  "Manage Your Trip",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: MediaQuery.of(context).padding.top + 20,
+            bottom: MediaQuery.of(context).padding.bottom,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              const Text(
+                "Manage Your Trip",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Check in, manage bookings, and more — all in one place.",
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
-                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Check in, manage bookings, and more — all in one place.",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
 
-                const SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-                // Main options (3 cards)
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final cardWidth = (constraints.maxWidth - 28) / 3;
-                    return IntrinsicHeight(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            width: cardWidth,
-                            child: ManageMainCard(
-                              icon: Icons.login_rounded,
-                              title: "Check-In",
-                              color: Colors.amberAccent,
-                              onTap: _showCheckInContent,
-                            ),
+              // Main options (3 cards)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final cardWidth = (constraints.maxWidth - 28) / 3;
+                  return IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: cardWidth,
+                          child: ManageMainCard(
+                            icon: Icons.login_rounded,
+                            title: "Check-In",
+                            color: Colors.amberAccent,
+                            onTap: _showCheckInContent,
                           ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: ManageMainCard(
-                              icon: Icons.airplane_ticket_rounded,
-                              title: "Manage Booking",
-                              color: Colors.blueAccent,
-                              onTap: _showManageBookingContent,
-                            ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: ManageMainCard(
+                            icon: Icons.airplane_ticket_rounded,
+                            title: "Manage Booking",
+                            color: Colors.blueAccent,
+                            onTap: _showManageBookingContent,
                           ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: ManageMainCard(
-                              icon: Icons.flight_takeoff_rounded,
-                              title: "Flight Status",
-                              color: Colors.greenAccent,
-                              onTap: _showFlightStatusContent,
-                            ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: ManageMainCard(
+                            icon: Icons.flight_takeoff_rounded,
+                            title: "Flight Status",
+                            color: Colors.greenAccent,
+                            onTap: _showFlightStatusContent,
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 40),
-
-                const Divider(
-                  color: Colors.white24,
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                ),
-                const SizedBox(height: 30),
-
-                // Below section
-                const Text(
-                  "Other Services",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final cardWidth = (constraints.maxWidth - 14) / 2;
-                    return IntrinsicHeight(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            width: cardWidth,
-                            child: ManageSubCard(
-                              icon: Icons.shopping_bag_rounded,
-                              title: "Add-ons",
-                              subtitle: "Add seats, meals, and baggage",
-                              color: Colors.orangeAccent,
-                              onTap: _showAddOnsContent,
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: ManageSubCard(
-                              icon: Icons.accessibility_new_rounded,
-                              title: "Special Assistance",
-                              subtitle: "Request travel support or help",
-                              color: Colors.purpleAccent,
-                              onTap: _showSpecialAssistanceContent,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 135),
-
-                // Footer
-                Center(
-                  child: Text(
-                    "© 2025 Airlines Ticketing. All rights reserved.",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 13,
+                        ),
+                      ],
                     ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 40),
+
+              const Divider(
+                color: Colors.white24,
+                thickness: 1,
+                indent: 10,
+                endIndent: 10,
+              ),
+              const SizedBox(height: 30),
+
+              // Below section
+              const Text(
+                "Other Services",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final cardWidth = (constraints.maxWidth - 14) / 2;
+                  return IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: cardWidth,
+                          child: ManageSubCard(
+                            icon: Icons.shopping_bag_rounded,
+                            title: "Add-ons",
+                            subtitle: "Add seats, meals, and baggage",
+                            color: Colors.orangeAccent,
+                            onTap: _showAddOnsContent,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: ManageSubCard(
+                            icon: Icons.accessibility_new_rounded,
+                            title: "Special Assistance",
+                            subtitle: "Request travel support or help",
+                            color: Colors.purpleAccent,
+                            onTap: _showSpecialAssistanceContent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 135),
+
+              // Footer
+              Center(
+                child: Text(
+                  "© 2025 Airlines Ticketing. All rights reserved.",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 13,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
