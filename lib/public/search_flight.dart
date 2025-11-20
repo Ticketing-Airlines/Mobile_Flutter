@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/public/roundtrip_flight.dart';
-import 'package:ticketing_flutter/public/multi_flight.dart';
 import 'package:ticketing_flutter/services/flight_service.dart';
-import 'package:ticketing_flutter/public/guest_details_page.dart';
 import 'package:ticketing_flutter/services/flight.dart';
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/bundle.dart';
@@ -11,12 +8,18 @@ class SearchFlightsPage extends StatefulWidget {
   final String from;
   final String to;
   final String departureDate;
+  final int adults;
+  final int children;
+  final int infants;
 
   const SearchFlightsPage({
     super.key,
     required this.from,
     required this.to,
     required this.departureDate,
+    required this.adults,
+    required this.children,
+    required this.infants,
   });
 
   @override
@@ -52,6 +55,9 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           from: widget.from,
           to: widget.to,
           departureDate: widget.departureDate,
+          adults: widget.adults,
+          children: widget.children,
+          infants: widget.infants,
         );
         break;
       case "Roundtrip":
@@ -65,6 +71,9 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           from: widget.from,
           to: widget.to,
           departureDate: widget.departureDate,
+          adults: widget.adults,
+          children: widget.children,
+          infants: widget.infants,
         );
     }
 
@@ -146,24 +155,22 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                           Icons.flight_takeoff,
                           color: Colors.blue,
                         ),
-                        title: Text("${flight.from} → ${flight.to}"),
+                        title: Text("${flight.from} →\n${flight.to}"),
                         subtitle: Text(
-                          "${flight.airline}\nDate: ${flight.date}  Time: ${flight.time}",
+                          "Flight ${flight.flightNumber} · ${flight.airline}\nDate: ${flight.date}  Time: ${flight.time}",
                         ),
-                        trailing: Text(
-                          "₱${flight.price}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
+
                         isThreeLine: true,
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  FlightBundlesPage(flight: flight),
+                              builder: (context) => FlightBundlesPage(
+                                flight: flight,
+                                adults: widget.adults,
+                                children: widget.children,
+                                infants: widget.infants,
+                              ),
                             ),
                           );
                         },

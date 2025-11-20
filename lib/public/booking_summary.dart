@@ -1,17 +1,50 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/payment.dart';
+import 'package:ticketing_flutter/services/flight.dart';
 
 class BookingSummaryPage extends StatelessWidget {
-  final Map<String, dynamic> flight;
+  final Flight flight;
   final Map<String, dynamic> bundle;
-  final Map<String, dynamic> guest;
+  final List<Map<String, dynamic>> guests;
+  final List<String> seatAssignments;
 
-  const BookingSummaryPage({
+  BookingSummaryPage({
     super.key,
     required this.flight,
     required this.bundle,
-    required this.guest,
-  });
+    required this.guests,
+  }) : seatAssignments = _generateSeatAssignments(guests.length);
+
+  static List<String> _generateSeatAssignments(int count) {
+    if (count == 0) return const <String>[];
+    const seatLetters = ["A", "B", "C", "D", "E", "F"];
+    final random = Random();
+    final seats = <String>[];
+
+    while (seats.length < count) {
+      final row = random.nextInt(45) + 1; // Rows 1-45
+      final letter = seatLetters[random.nextInt(seatLetters.length)];
+      final candidate = "$row$letter";
+      if (!seats.contains(candidate)) {
+        seats.add(candidate);
+      }
+    }
+    return seats;
+  }
+
+  int get _travelerCount => guests.length;
+
+  double get _bundlePricePerGuest => (bundle["price"] ?? 0).toDouble();
+
+  double get _flightFareTotal => flight.price * _travelerCount;
+
+  double get _bundleFareTotal => _bundlePricePerGuest * _travelerCount;
+
+  double get _grandTotal => _flightFareTotal + _bundleFareTotal;
+
+  String _formatCurrency(double value) => "PHP ${value.toStringAsFixed(2)}";
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +58,7 @@ class BookingSummaryPage extends StatelessWidget {
             colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
           ),
         ),
-        // ❌ Removed SingleChildScrollView
-        // ✅ Use Column + Expanded for fixed layout
+
         padding: const EdgeInsets.fromLTRB(16, 40, 16, 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,6 +92,14 @@ class BookingSummaryPage extends StatelessWidget {
 
   // ✈️ Flight Details Card
   Widget _buildFlightCard(BuildContext context) {
+    final passengerNames = guests
+        .map(
+          (guest) =>
+              "${guest["title"] ?? ""} ${guest["firstName"]} ${guest["lastName"]}"
+                  .trim(),
+        )
+        .join(", ");
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -85,7 +125,7 @@ class BookingSummaryPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  flight["from"],
+                  flight.from,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -107,7 +147,7 @@ class BookingSummaryPage extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 Text(
-                  flight["to"],
+                  flight.to,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -119,21 +159,31 @@ class BookingSummaryPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 8),
-          Text(
-            flight["date"] ?? "",
-            style: const TextStyle(color: Colors.white70, fontSize: 15),
+          _infoRow(Icons.local_airport, "Airline", flight.airline),
+          _infoRow(
+            Icons.confirmation_number_outlined,
+            "Flight Number",
+            flight.flightNumber,
           ),
-          const SizedBox(height: 20),
+          _infoRow(
+            Icons.calendar_today_outlined,
+            "Departure Date",
+            flight.date,
+          ),
+          _infoRow(Icons.schedule, "Departure Time", flight.time),
+          const SizedBox(height: 16),
           Row(
             children: [
               const Icon(Icons.person_outline, color: Colors.white70),
               const SizedBox(width: 8),
-              Text(
-                "${guest["firstName"]} ${guest["lastName"]}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Text(
+                  passengerNames,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -150,13 +200,55 @@ class BookingSummaryPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            "Seat: Unassigned, Unassigned",
-            style: TextStyle(color: Colors.white54),
-          ),
+          if (guests.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            ...guests.asMap().entries.map((entry) {
+              final index = entry.key;
+              final guest = entry.value;
+              final seat = seatAssignments[index];
+              final title = guest["title"] ?? guest["type"] ?? "Guest";
+              final fullName = "${guest["firstName"]} ${guest["lastName"]}"
+                  .trim();
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.event_seat,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "$title $fullName",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            "Seat $seat · ${guest["label"]}",
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
           const Divider(height: 32, color: Colors.white24, thickness: 0.8),
           const Text(
-            "Taxes and Fees",
+            "Fare Summary",
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -164,8 +256,16 @@ class BookingSummaryPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          _priceRow("Base Fare", "PHP 3,471.44"),
-          _priceRow("Travel Insurance", "PHP 525.00"),
+          _priceRow(
+            "Flight Fare (${_travelerCount} pax)",
+            _formatCurrency(_flightFareTotal),
+          ),
+          _priceRow(
+            "${bundle["name"]} (${_travelerCount} pax)",
+            _bundlePricePerGuest == 0
+                ? "Included"
+                : _formatCurrency(_bundleFareTotal),
+          ),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () {},
@@ -186,10 +286,10 @@ class BookingSummaryPage extends StatelessWidget {
               border: Border.all(color: Colors.white24),
             ),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "Total",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -198,8 +298,8 @@ class BookingSummaryPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "PHP 3,996.44",
-                  style: TextStyle(
+                  _formatCurrency(_grandTotal),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                     color: Colors.white,
@@ -294,6 +394,25 @@ class BookingSummaryPage extends StatelessWidget {
         children: [
           Text(label, style: const TextStyle(color: Colors.white70)),
           Text(value, style: const TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String label, String value) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "$label: $value",
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ),
         ],
       ),
     );

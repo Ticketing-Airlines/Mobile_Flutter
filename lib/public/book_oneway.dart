@@ -518,6 +518,9 @@ class _BookOneway extends State<BookOneway> {
                                   from: box4Controller.text,
                                   to: box5Controller.text,
                                   departureDate: box6Controller.text,
+                                  adults: _adults,
+                                  children: _children,
+                                  infants: _infants,
                                 ),
                               ),
                             );

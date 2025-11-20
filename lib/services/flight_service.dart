@@ -8,28 +8,31 @@ class FlightService {
   }) {
     List<Flight> flights = [
       Flight(
+        flightNumber: "PR123",
         from: "Philippines - Manila",
         to: "Philippines - Cebu",
         airline: "Philippine Airlines",
         date: "2025-12-20",
         time: "08:00 AM",
-        price: 25000,
+        price: 25000.0,
       ),
       Flight(
+        flightNumber: "KE678",
         from: "Philippines - Cebu",
         to: "South Korea - Seoul",
         airline: "Korean Air",
         date: "2025-10-22",
         time: "02:00 PM",
-        price: 30000,
+        price: 30000.0,
       ),
       Flight(
+        flightNumber: "DL905",
         from: "Japan - Tokyo",
         to: "Japan - Osaka",
         airline: "Delta Airlines",
         date: "2025-10-29",
         time: "10:00 PM",
-        price: 40000,
+        price: 40000.0,
       ),
       // Add more flights here...
     ];
