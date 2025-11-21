@@ -172,6 +172,7 @@ class _BookMulticityState extends State<BookMulticity> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: Drawer(
         width: 300.0,
         backgroundColor: const Color(0xFF111827),

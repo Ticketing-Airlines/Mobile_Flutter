@@ -37,6 +37,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
     super.initState();
     box7Controller.text = "${_adults + _children + _infants} Passengers";
     box8Controller.text = _selectedClass;
+    _calculatePrice();
   }
 
   void _calculatePrice() {
@@ -216,6 +217,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: Drawer(
         width: 300.0,
         backgroundColor: const Color(0xFF111827),
@@ -305,7 +307,7 @@ class _BookRoundtrip extends State<BookRoundtrip> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenHeight = constraints.maxHeight;
-          final boxHeight = 590.0;
+          final boxHeight = 605.0;
           final boxWidth = 330.0;
           final boxTop = (screenHeight / 2) - (boxHeight / 2);
           final screenWidth = MediaQuery.of(context).size.width;
@@ -450,39 +452,30 @@ class _BookRoundtrip extends State<BookRoundtrip> {
                         const SizedBox(height: 12),
 
                         // 🟩 Add total price display here
-                        if (box6Controller.text.isNotEmpty ||
-                            box9Controller.text.isNotEmpty)
-                          Container(
-                            width: 300,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Total Price",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Row(
+                            children: [
+                              const Text(
+                                "Total Price:",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF1E3A8A),
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "₱$_totalPrice",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1E3A8A),
-                                  ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "₱$_totalPrice",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E3A8A),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
+                        ),
 
                         const SizedBox(height: 20),
 
@@ -917,20 +910,19 @@ class _BookRoundtrip extends State<BookRoundtrip> {
             ),
           ),
         ),
-        if (controller.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 8),
-            child: Text(
-              hint == "Departure"
-                  ? 'Price: ₱$_departurePrice'
-                  : 'Price: ₱$_arrivalPrice',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
-              ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, left: 8),
+          child: Text(
+            hint == "Departure"
+                ? 'Price: ₱$_departurePrice'
+                : 'Price: ₱$_arrivalPrice',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E3A8A),
             ),
           ),
+        ),
       ],
     );
   }

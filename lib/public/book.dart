@@ -33,9 +33,6 @@ class _Book extends State<Book> {
   String _selectedClass = "Economy";
   int _selectedPrice = 0;
   int _departurePrice = 2000; // Default price below Departure
-  final bool _isTotalPriceManual = false; // new flag
-
-  bool _hasSelectedPassengers = false;
 
   bool _isSearchPressed = false;
 
@@ -117,10 +114,6 @@ class _Book extends State<Book> {
                       onPressed: () {
                         final total = _adults + _children + _infants;
                         box7Controller.text = "$total Passengers";
-
-                        setState(() {
-                          _hasSelectedPassengers = true;
-                        });
 
                         // Update total price
                         this.setState(() {
@@ -213,6 +206,7 @@ class _Book extends State<Book> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: Drawer(
         width: 300.0,
         backgroundColor: const Color(0xFF111827),
@@ -487,7 +481,7 @@ class _Book extends State<Book> {
                                     left: 8,
                                   ),
                                   child: Text(
-                                    'Total Price: ₱$_selectedPrice',
+                                    'Total Price: ${box6Controller.text.isEmpty ? '--' : '₱$_selectedPrice'}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -546,6 +540,13 @@ class _Book extends State<Book> {
                               return;
                             }
 
+                            // compute per-passenger price to send downstream
+                            final totalPassengers =
+                                _adults + _children + _infants;
+                            final double perPassengerPrice = totalPassengers > 0
+                                ? (_selectedPrice / totalPassengers)
+                                : _selectedPrice.toDouble();
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -553,6 +554,14 @@ class _Book extends State<Book> {
                                   from: box4Controller.text,
                                   to: box5Controller.text,
                                   departureDate: box6Controller.text,
+                                  adults: _adults,
+                                  children: _children,
+                                  infants: _infants,
+                                ),
+                                settings: RouteSettings(
+                                  arguments: {
+                                    'selectedPrice': perPassengerPrice,
+                                  },
                                 ),
                               ),
                             );
@@ -680,7 +689,6 @@ class _Book extends State<Book> {
       ),
       child: RawAutocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
-          String input = textEditingValue.text.toLowerCase();
           List<String> options = [];
 
           // Check if the input is a country name (exact match)
@@ -1029,7 +1037,7 @@ class _Book extends State<Book> {
         Padding(
           padding: const EdgeInsets.only(top: 6, left: 8),
           child: Text(
-            'Price: ₱$_departurePrice', // <-- use the new variable
+            'Price: ${box6Controller.text.isEmpty ? '--' : '₱$_departurePrice'}', // <-- use the new variable
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,

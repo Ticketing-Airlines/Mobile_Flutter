@@ -213,6 +213,7 @@ class _BookOneway extends State<BookOneway> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer: Drawer(
         width: 300.0,
         backgroundColor: const Color(0xFF111827),
@@ -517,6 +518,9 @@ class _BookOneway extends State<BookOneway> {
                                   from: box4Controller.text,
                                   to: box5Controller.text,
                                   departureDate: box6Controller.text,
+                                  adults: _adults,
+                                  children: _children,
+                                  infants: _infants,
                                 ),
                               ),
                             );
