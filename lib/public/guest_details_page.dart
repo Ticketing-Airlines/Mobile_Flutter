@@ -82,6 +82,7 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
   late final List<_PassengerDescriptor> _passengers;
   late final List<_GuestFormModel> _guestForms;
   bool _isPrivatePolicyChecked = false;
+  double? _selectedPrice;
 
   @override
   void initState() {
@@ -168,6 +169,14 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Read selectedPrice from RouteSettings.arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && _selectedPrice == null) {
+      final raw = args['selectedPrice'];
+      if (raw is double) _selectedPrice = raw;
+      if (raw is int) _selectedPrice = raw.toDouble();
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -459,6 +468,7 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
           flight: widget.flight,
           bundle: widget.bundle,
           guests: guests,
+          selectedPrice: _selectedPrice ?? widget.flight.price,
         ),
       ),
     );

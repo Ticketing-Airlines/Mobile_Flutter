@@ -14,8 +14,8 @@ class Flight {
     required this.airline,
     required this.date,
     required this.time,
-    required this.price,
-  });
+    double? price, // made optional for mock data
+  }) : price = price ?? 0.0;
 
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(

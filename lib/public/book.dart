@@ -540,6 +540,13 @@ class _Book extends State<Book> {
                               return;
                             }
 
+                            // compute per-passenger price to send downstream
+                            final totalPassengers =
+                                _adults + _children + _infants;
+                            final double perPassengerPrice = totalPassengers > 0
+                                ? (_selectedPrice / totalPassengers)
+                                : _selectedPrice.toDouble();
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -550,6 +557,11 @@ class _Book extends State<Book> {
                                   adults: _adults,
                                   children: _children,
                                   infants: _infants,
+                                ),
+                                settings: RouteSettings(
+                                  arguments: {
+                                    'selectedPrice': perPassengerPrice,
+                                  },
                                 ),
                               ),
                             );

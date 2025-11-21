@@ -1,11 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/public/booking_information.dart';
+import 'package:ticketing_flutter/public/home.dart';
 
-class PaymentPage extends StatelessWidget {
+class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
 
   @override
+  State<PaymentPage> createState() => _PaymentPageState();
+}
+
+class _PaymentPageState extends State<PaymentPage> {
+  String? _method; // 'cash' | 'maya' | 'card'
+  final _cardName = TextEditingController();
+  final _cardNumber = TextEditingController();
+  final _cardExpiry = TextEditingController();
+  final _cardCvv = TextEditingController();
+
+  @override
+  void dispose() {
+    _cardName.dispose();
+    _cardNumber.dispose();
+    _cardExpiry.dispose();
+    _cardCvv.dispose();
+    super.dispose();
+  }
+
+  bool get _isCardValid {
+    return _cardName.text.trim().isNotEmpty &&
+        _cardNumber.text.trim().length >= 12 &&
+        _cardExpiry.text.trim().isNotEmpty &&
+        _cardCvv.text.trim().length >= 3;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // optional total passed via Navigator (RouteSettings.arguments: {'total': double})
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final double? total = (args is Map && args['total'] is num)
+        ? (args['total'] as num).toDouble()
+        : null;
+    final totalLabel = total != null ? "PHP ${total.toStringAsFixed(2)}" : "--";
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Container(
@@ -17,211 +51,217 @@ class PaymentPage extends StatelessWidget {
             colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 70, 20, 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // 🧾 Page Title
-              const Text(
-                "Payment",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Payment",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
-              // 💳 Card Information Section
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blueAccent.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                // Total summary
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Total",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      Text(
+                        totalLabel,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Card Information",
-                      style: TextStyle(
+
+                const SizedBox(height: 20),
+
+                const Text(
+                  "Choose Payment Method",
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+
+                // Cash
+                RadioListTile<String>(
+                  value: 'cash',
+                  groupValue: _method,
+                  title: const Text(
+                    "Cash",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: const Text(
+                    "Pay at counter or on arrival",
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                  activeColor: Colors.blueAccent,
+                  onChanged: (v) => setState(() => _method = v),
+                ),
+
+                // Maya
+                RadioListTile<String>(
+                  value: 'maya',
+                  groupValue: _method,
+                  title: const Text(
+                    "Maya",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: const Text(
+                    "Pay via Maya QR or wallet",
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                  activeColor: Colors.blueAccent,
+                  onChanged: (v) => setState(() => _method = v),
+                ),
+
+                // Debit/Credit Card
+                RadioListTile<String>(
+                  value: 'card',
+                  groupValue: _method,
+                  title: const Text(
+                    "Debit / Credit Card",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  subtitle: const Text(
+                    "Pay with card",
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                  activeColor: Colors.blueAccent,
+                  onChanged: (v) => setState(() => _method = v),
+                ),
+
+                // Card fields (only when card selected)
+                if (_method == 'card') ...[
+                  const SizedBox(height: 8),
+                  _buildField(controller: _cardName, hint: "Cardholder Name"),
+                  const SizedBox(height: 8),
+                  _buildField(
+                    controller: _cardNumber,
+                    hint: "Card Number",
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildField(
+                          controller: _cardExpiry,
+                          hint: "MM/YY",
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 100,
+                        child: _buildField(
+                          controller: _cardCvv,
+                          hint: "CVV",
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                const Spacer(),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.shade400,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed:
+                        (_method == null ||
+                            (_method == 'card' && !_isCardValid))
+                        ? null
+                        : () {
+                            // Simulate payment processing...
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Payment successful"),
+                              ),
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Home(),
+                              ),
+                            );
+                          },
+                    child: Text(
+                      _method == null
+                          ? "Select payment method"
+                          : (_method == 'card' ? "Pay with Card" : "Proceed"),
+                      style: const TextStyle(
+                        fontSize: 16,
                         color: Colors.white,
-                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 15),
-
-                    _buildTextField(
-                      label: "Cardholder Name",
-                      icon: Icons.person_outline,
-                    ),
-                    const SizedBox(height: 15),
-                    _buildTextField(
-                      label: "Card Number",
-                      icon: Icons.credit_card,
-                    ),
-                    const SizedBox(height: 15),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            label: "Expiry Date",
-                            icon: Icons.calendar_today,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildTextField(
-                            label: "CVV",
-                            icon: Icons.lock_outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // 🏦 Payment Summary
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white24),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 18,
-                ),
-                child: Column(
-                  children: const [
-                    _SummaryRow(label: "Base Fare", value: "PHP 3,471.44"),
-                    _SummaryRow(label: "Travel Insurance", value: "PHP 525.00"),
-                    Divider(color: Colors.white24, height: 20),
-                    _SummaryRow(
-                      label: "Total",
-                      value: "PHP 3,996.44",
-                      bold: true,
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
-              // 🟦 Pay Button
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent.shade400,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 10,
-                    shadowColor: Colors.blueAccent.withOpacity(0.5),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BookingConfirmationPage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "Pay Now",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                      color: Colors.white,
-                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Custom Text Field Widget
-  Widget _buildTextField({required String label, required IconData icon}) {
+  Widget _buildField({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+  }) {
     return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
-      cursorColor: Colors.blueAccent,
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.white70),
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white54),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white54),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.03),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.white24),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.blueAccent),
         ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
       ),
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool bold;
-
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-    this.bold = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
+      onChanged: (_) => setState(() {}),
     );
   }
 }

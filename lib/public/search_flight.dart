@@ -30,6 +30,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   String selectedTripType = "One Way";
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
   late Future<List<Flight>> _flightsFuture;
+  double? _perPassengerPrice; // read from RouteSettings.arguments
 
   @override
   void initState() {
@@ -85,6 +86,14 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // read per-passenger price passed via RouteSettings.arguments by book.dart
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && _perPassengerPrice == null) {
+      final raw = args['selectedPrice'];
+      if (raw is double) _perPassengerPrice = raw;
+      if (raw is int) _perPassengerPrice = raw.toDouble();
+    }
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,6 +179,11 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                                 adults: widget.adults,
                                 children: widget.children,
                                 infants: widget.infants,
+                              ),
+                              settings: RouteSettings(
+                                arguments: {
+                                  'selectedPrice': _perPassengerPrice,
+                                }, // forward per-passenger price (may be null)
                               ),
                             ),
                           );

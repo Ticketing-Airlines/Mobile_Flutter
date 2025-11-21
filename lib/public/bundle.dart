@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/services/flight.dart';
-import 'package:ticketing_flutter/public/guest_details_page.dart';
+import 'guest_details_page.dart';
 
-class FlightBundlesPage extends StatelessWidget {
+class FlightBundlesPage extends StatefulWidget {
   final Flight flight;
   final int adults;
   final int children;
   final int infants;
-
-  FlightBundlesPage({
+  // optional: keep existing constructor, no change required here if using ModalRoute
+  const FlightBundlesPage({
     super.key,
     required this.flight,
     required this.adults,
     required this.children,
     required this.infants,
   });
+
+  @override
+  State<FlightBundlesPage> createState() => _FlightBundlesPageState();
+}
+
+class _FlightBundlesPageState extends State<FlightBundlesPage> {
+  double? _perPassengerPrice;
 
   final List<Map<String, dynamic>> bundles = [
     {
@@ -50,7 +57,21 @@ class FlightBundlesPage extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // don't read ModalRoute here (may be null); read in build instead
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Read forwarded per-passenger price (book -> search -> bundle) once
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && _perPassengerPrice == null) {
+      final raw = args['selectedPrice'];
+      if (raw is double) _perPassengerPrice = raw;
+      if (raw is int) _perPassengerPrice = raw.toDouble();
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -182,17 +203,26 @@ class FlightBundlesPage extends StatelessWidget {
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         onPressed: () {
+                                          final double forwardedPrice =
+                                              _perPassengerPrice ??
+                                              widget.flight.price;
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   GuestDetailsPage(
-                                                    flight: flight,
+                                                    flight: widget.flight,
                                                     bundle: bundle,
-                                                    adults: adults,
-                                                    children: children,
-                                                    infants: infants,
+                                                    adults: widget.adults,
+                                                    children: widget.children,
+                                                    infants: widget.infants,
                                                   ),
+                                              settings: RouteSettings(
+                                                arguments: {
+                                                  'selectedPrice':
+                                                      forwardedPrice,
+                                                },
+                                              ),
                                             ),
                                           );
                                         },

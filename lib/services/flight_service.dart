@@ -14,7 +14,7 @@ class FlightService {
         airline: "Philippine Airlines",
         date: "2025-12-20",
         time: "08:00 AM",
-        price: 25000.0,
+        // price removed (mock data only)
       ),
       Flight(
         flightNumber: "KE678",
@@ -23,7 +23,7 @@ class FlightService {
         airline: "Korean Air",
         date: "2025-10-22",
         time: "02:00 PM",
-        price: 30000.0,
+        // price removed (mock data only)
       ),
       Flight(
         flightNumber: "DL905",
@@ -32,7 +32,7 @@ class FlightService {
         airline: "Delta Airlines",
         date: "2025-10-29",
         time: "10:00 PM",
-        price: 40000.0,
+        // price removed (mock data only)
       ),
       // Add more flights here...
     ];
