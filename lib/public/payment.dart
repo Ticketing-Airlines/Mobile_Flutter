@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/home.dart';
+import 'package:ticketing_flutter/public/booking_confirmation.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -200,18 +201,45 @@ class _PaymentPageState extends State<PaymentPage> {
                         (_method == null ||
                             (_method == 'card' && !_isCardValid))
                         ? null
-                        : () {
-                            // Simulate payment processing...
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Payment successful"),
+                        : () async {
+                            // Show a short “Done booking…” dialog
+                            await showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: const Color(0xFF111827),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                title: const Text(
+                                  "Done booking!",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                content: const Text(
+                                  "Your payment has been processed successfully.",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text(
+                                      "OK",
+                                      style: TextStyle(
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
-                            Navigator.push(
+
+                            // After the dialog is dismissed, go back to Home
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const Home(),
+                                builder: (_) => const BookingConfirmationPage(),
                               ),
+                              (route) => false,
                             );
                           },
                     child: Text(

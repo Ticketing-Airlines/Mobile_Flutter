@@ -463,13 +463,16 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => BookingSummaryPage(
-          flight: widget.flight,
-          bundle: widget.bundle,
-          guests: guests,
-          selectedPrice: _selectedPrice ?? widget.flight.price,
-        ),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            BookingSummaryPage(
+              flight: widget.flight,
+              bundle: widget.bundle,
+              guests: guests,
+              selectedPrice: _selectedPrice ?? widget.flight.price,
+            ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }

@@ -30,7 +30,8 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   String selectedTripType = "One Way";
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
   late Future<List<Flight>> _flightsFuture;
-  double? _perPassengerPrice; // read from RouteSettings.arguments
+  double? _perPassengerPrice;
+  String _selectedClass = "Economy"; // default travel class
 
   @override
   void initState() {
@@ -86,18 +87,24 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // read per-passenger price passed via RouteSettings.arguments by book.dart
+    // Read arguments passed via RouteSettings.arguments
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map && _perPassengerPrice == null) {
-      final raw = args['selectedPrice'];
-      if (raw is double) _perPassengerPrice = raw;
-      if (raw is int) _perPassengerPrice = raw.toDouble();
+    if (args is Map) {
+      if (_perPassengerPrice == null) {
+        final raw = args['selectedPrice'];
+        if (raw is double) _perPassengerPrice = raw;
+        if (raw is int) _perPassengerPrice = raw.toDouble();
+      }
+      if (args['selectedClass'] != null) {
+        _selectedClass = args['selectedClass'] as String;
+      }
     }
 
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header: Available Flights + Trip Type
           Padding(
             padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
             child: Row(
@@ -139,7 +146,10 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+
+          // Travel Class Selector
+
+          // Flight List
           Expanded(
             child: FutureBuilder<List<Flight>>(
               future: _flightsFuture,
@@ -159,35 +169,48 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                     final flight = flights[index];
                     return Card(
                       margin: const EdgeInsets.all(10),
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.flight_takeoff,
-                          color: Colors.blue,
-                        ),
-                        title: Text("${flight.from} →\n${flight.to}"),
-                        subtitle: Text(
-                          "Flight ${flight.flightNumber} · ${flight.airline}\nDate: ${flight.date}  Time: ${flight.time}",
-                        ),
-
-                        isThreeLine: true,
+                      child: InkWell(
+                        splashColor: const Color.fromARGB(
+                          255,
+                          20,
+                          92,
+                          151,
+                        ).withAlpha(80),
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => FlightBundlesPage(
-                                flight: flight,
-                                adults: widget.adults,
-                                children: widget.children,
-                                infants: widget.infants,
-                              ),
+                            PageRouteBuilder(
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      FlightBundlesPage(
+                                        flight: flight,
+                                        adults: widget.adults,
+                                        children: widget.children,
+                                        infants: widget.infants,
+                                      ),
                               settings: RouteSettings(
                                 arguments: {
                                   'selectedPrice': _perPassengerPrice,
-                                }, // forward per-passenger price (may be null)
+                                  'selectedClass': _selectedClass,
+                                },
                               ),
                             ),
                           );
                         },
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.flight_takeoff,
+                            color: Colors.blue,
+                          ),
+                          title: Text("${flight.from} →\n${flight.to}"),
+                          subtitle: Text(
+                            "Flight ${flight.flightNumber} · ${flight.airline}\n"
+                            "Date: ${flight.date}  Time: ${flight.time}",
+                          ),
+                          isThreeLine: true,
+                        ),
                       ),
                     );
                   },

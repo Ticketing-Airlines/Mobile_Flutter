@@ -549,18 +549,23 @@ class _Book extends State<Book> {
 
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchFlightsPage(
-                                  from: box4Controller.text,
-                                  to: box5Controller.text,
-                                  departureDate: box6Controller.text,
-                                  adults: _adults,
-                                  children: _children,
-                                  infants: _infants,
-                                ),
+                              PageRouteBuilder(
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        SearchFlightsPage(
+                                          from: box4Controller.text,
+                                          to: box5Controller.text,
+                                          departureDate: box6Controller.text,
+                                          adults: _adults,
+                                          children: _children,
+                                          infants: _infants,
+                                        ),
                                 settings: RouteSettings(
                                   arguments: {
                                     'selectedPrice': perPassengerPrice,
+                                    'selectedClass': _selectedClass,
                                   },
                                 ),
                               ),
