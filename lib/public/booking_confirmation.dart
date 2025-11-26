@@ -1,427 +1,442 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/services/flight.dart';
+import 'package:ticketing_flutter/public/home.dart';
 
 class BookingConfirmationPage extends StatelessWidget {
-  final Flight? flight;
-
-  // Guests and per-guest details (name, dob, passengerType, contact)
-  final List<Map<String, dynamic>>? guests;
-
-  // Seat assignments per guest index
-  final List<String>? seatAssignments;
-
-  // Selected fare / class / promo
-  final String? travelClass;
-  final double? selectedPrice;
-  final String? promoCode;
-  final double? promoDiscount; // absolute value
-
-  // Bundle / add-ons selected (example: { "name": "Extra Baggage", "price": 120.0 })
-  final List<Map<String, dynamic>>? addOns;
-  final Map<String, dynamic>? bundle;
-
-  // Contact & billing
-  final Map<String, dynamic>? contact; // { "email": "...", "phone": "..." }
-  final Map<String, dynamic>?
-  billing; // { "method": "Card", "cardLast4": "1234" }
-
-  // Payment & booking result
+  final Flight flight;
+  final Map<String, dynamic> bundle;
+  final List<Map<String, dynamic>> guests;
+  final List<String> seatAssignments;
+  final double selectedPrice;
+  final String travelClass;
+  final int adults;
+  final int children;
+  final int infants;
   final String? paymentMethod;
-  final bool? paymentSuccessful;
-  final String? bookingReference;
-  final DateTime? bookingTime;
-  final List<Map<String, dynamic>>?
-  issuedTickets; // [{ "passengerIndex":0, "ticketNo":"ABC123", "pnr":"PNR1" }]
-
-  // Timeline of user actions from selection -> payment -> confirm (optional)
-  final List<String>? actionTimeline;
-
-  // Total override (optional)
-  final double? total;
 
   const BookingConfirmationPage({
-    Key? key,
-    this.flight,
-    this.guests,
-    this.seatAssignments,
-    this.travelClass,
-    this.selectedPrice,
-    this.promoCode,
-    this.promoDiscount,
-    this.addOns,
-    this.bundle,
-    this.contact,
-    this.billing,
+    super.key,
+    required this.flight,
+    required this.bundle,
+    required this.guests,
+    required this.seatAssignments,
+    required this.selectedPrice,
+    required this.travelClass,
+    required this.adults,
+    required this.children,
+    required this.infants,
     this.paymentMethod,
-    this.paymentSuccessful,
-    this.bookingReference,
-    this.bookingTime,
-    this.issuedTickets,
-    this.actionTimeline,
-    this.total,
-  }) : super(key: key);
+  });
 
-  String currency(double? v) => v == null ? '-' : "₱${v.toStringAsFixed(2)}";
+  int get travelerCount => guests.length;
+  double get bundlePerGuest => (bundle["price"] ?? 0).toDouble();
+  double get totalFlight => selectedPrice;
+  double get totalBundle => bundlePerGuest * travelerCount;
+  double get grandTotal => totalFlight + totalBundle;
 
-  String _formatDateTime(DateTime? dt) {
-    if (dt == null) return '-';
-    return "${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} "
-        "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+  String currency(double v) => "PHP ${v.toStringAsFixed(2)}";
+
+  Widget _card(Widget child) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: child,
+    );
   }
 
-  Widget _sectionTitle(String t) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
-    child: Text(
-      t,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1E3A8A),
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              "$label:",
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 
-  Widget _infoRow(String label, String value, {bool emphasize = false}) =>
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 4,
-              child: Text(
-                value,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: emphasize ? FontWeight.bold : FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
-      );
+      ),
+    );
+  }
+
+  Widget _priceRow(String label, String price, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            price,
+            style: TextStyle(
+              color: isTotal ? Colors.blueAccent.shade400 : Colors.white,
+              fontSize: isTotal ? 18 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final _guests = guests ?? [];
-    final _seatAssignments =
-        seatAssignments ?? List.generate(_guests.length, (index) => "-");
-    final double flightPrice = selectedPrice ?? flight?.price ?? 0.0;
-    final double bundlePrice = (bundle?["price"] ?? 0).toDouble();
-    final double addOnsTotal = (addOns ?? []).fold(
-      0.0,
-      (s, a) => s + ((a["price"] ?? 0).toDouble()),
-    );
-    final int pax = _guests.length;
-    final double subtotal =
-        (flightPrice * pax) + (bundlePrice * pax) + addOnsTotal;
-    final double discount = promoDiscount ?? 0.0;
-    final double computedTotal = total ?? (subtotal - discount);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Booking Confirmation"),
-        backgroundColor: const Color(0xFF1E3A8A),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
           ),
+        ),
+        child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header + booking status
-                Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        paymentSuccessful == true
-                            ? Icons.check_circle
-                            : Icons.info,
-                        color: paymentSuccessful == true
-                            ? Colors.green
-                            : Colors.orange,
-                        size: 64,
+                // Header with success icon
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.2),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        paymentSuccessful == true
-                            ? "Booking Confirmed"
-                            : "Booking Pending",
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3A8A),
-                        ),
+                      child: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 48,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Ref: ${bookingReference ?? DateTime.now().millisecondsSinceEpoch}",
-                        style: const TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Booking Confirmed!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Booked: ${_formatDateTime(bookingTime ?? DateTime.now())}",
-                        style: const TextStyle(color: Colors.black54),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Booking Reference: ${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 18),
-
-                // Action timeline (what user clicked)
-                if ((actionTimeline ?? []).isNotEmpty) ...[
-                  _sectionTitle("Your Actions"),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: actionTimeline!.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (_, i) {
-                      return ListTile(
-                        leading: CircleAvatar(child: Text("${i + 1}")),
-                        title: Text(actionTimeline![i]),
-                        dense: true,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
-                // Flight summary
-                _sectionTitle("Flight Summary"),
-                _infoRow("From", flight?.from ?? "-"),
-                _infoRow("To", flight?.to ?? "-"),
-                _infoRow("Airline", flight?.airline ?? "-"),
-                _infoRow("Flight No.", flight?.flightNumber ?? "-"),
-                _infoRow("Date", flight?.date ?? "-"),
-                _infoRow("Time", flight?.time ?? "-"),
-                _infoRow("Class", travelClass ?? "-"),
-                _infoRow("Fare / pax", currency(flightPrice)),
-
-                const SizedBox(height: 12),
-
-                // Passengers, seats, contact
-                _sectionTitle("Passengers & Seats"),
-                ...List.generate(_guests.length, (i) {
-                  final g = _guests[i];
-                  final seat = _seatAssignments.length > i
-                      ? _seatAssignments[i]
-                      : "-";
-                  final name =
-                      "${g['title'] ?? ''} ${g['firstName'] ?? ''} ${g['lastName'] ?? ''}"
-                          .trim();
-                  final ptype = g['passengerType'] ?? "";
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Scrollable content
+                Expanded(
+                  child: ListView(
                     children: [
-                      _infoRow("Passenger ${i + 1}", name.isEmpty ? "-" : name),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 0,
-                          top: 2,
-                          bottom: 8,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // Flight Information
+                      _card(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Type",
-                              style: const TextStyle(color: Colors.black54),
-                            ),
-                            Text(
-                              ptype.toString(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                            _sectionTitle("Flight Information"),
+                            Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    flight.from,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Icon(
+                                    Icons.flight_takeoff,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    flight.to,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Seat",
-                              style: const TextStyle(color: Colors.black54),
-                            ),
-                            Text(
-                              seat,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            const SizedBox(height: 16),
+                            _infoRow("Airline", flight.airline),
+                            _infoRow("Flight Number", flight.flightNumber),
+                            _infoRow("Departure Date", flight.date),
+                            _infoRow("Departure Time", flight.time),
+                            _infoRow("Travel Class", travelClass),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+
+                      // Passenger Information
+                      _card(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _sectionTitle("Passenger Information"),
+                            _infoRow("Adults", adults.toString()),
+                            _infoRow("Children", children.toString()),
+                            _infoRow("Infants", infants.toString()),
+                            _infoRow(
+                              "Total Passengers",
+                              travelerCount.toString(),
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(color: Colors.white24),
+                            const SizedBox(height: 12),
+                            ...guests.asMap().entries.map((entry) {
+                              final idx = entry.key;
+                              final guest = entry.value;
+                              final seat = seatAssignments[idx];
+                              final title =
+                                  guest["title"] ?? guest["type"] ?? "";
+                              final firstName = guest["firstName"] ?? "";
+                              final lastName = guest["lastName"] ?? "";
+                              final fullName = "$title $firstName $lastName"
+                                  .trim();
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      fullName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.event_seat,
+                                          color: Colors.blueAccent,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          "Seat: $seat",
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (guest["dob"] != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "DOB: ${guest["dob"]}",
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Bundle Information
+                      _card(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _sectionTitle("Bundle Choice"),
+                            _infoRow("Bundle", bundle["name"]),
+                            if (bundlePerGuest > 0)
+                              _infoRow(
+                                "Price per Guest",
+                                currency(bundlePerGuest),
+                              )
+                            else
+                              const Text(
+                                "Included in base fare",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            if (bundle["details"] != null) ...[
+                              const SizedBox(height: 12),
+                              const Divider(color: Colors.white24),
+                              const SizedBox(height: 8),
+                              const Text(
+                                "Bundle Details:",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...(bundle["details"] as List).map<Widget>(
+                                (detail) => Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: 6,
+                                    left: 8,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle_outline,
+                                        color: Colors.blueAccent,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          detail.toString(),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Payment Summary
+                      _card(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _sectionTitle("Payment Summary"),
+                            _priceRow("Flight Fare", currency(totalFlight)),
+                            _priceRow(
+                              "${bundle["name"]} (${travelerCount} pax)",
+                              bundlePerGuest == 0
+                                  ? "Included"
+                                  : currency(totalBundle),
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(color: Colors.white24),
+                            const SizedBox(height: 8),
+                            _priceRow(
+                              "TOTAL",
+                              currency(grandTotal),
+                              isTotal: true,
+                            ),
+                            if (paymentMethod != null) ...[
+                              const SizedBox(height: 12),
+                              const Divider(color: Colors.white24),
+                              const SizedBox(height: 8),
+                              _infoRow("Payment Method", paymentMethod!),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Action Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent.shade400,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 4,
+                          ),
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const Home()),
+                              (route) => false,
+                            );
+                          },
+                          child: const Text(
+                            "Back to Home",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
-                  );
-                }),
-
-                const SizedBox(height: 12),
-
-                // Add-ons & extras
-                if ((addOns ?? []).isNotEmpty) ...[
-                  _sectionTitle("Add-ons / Extras"),
-                  ...addOns!
-                      .map(
-                        (a) => _infoRow(
-                          a["name"] ?? "-",
-                          currency((a["price"] ?? 0).toDouble()),
-                        ),
-                      )
-                      .toList(),
-                  const SizedBox(height: 8),
-                ],
-
-                // Bundle
-                if (bundle != null) ...[
-                  _sectionTitle("Bundle"),
-                  _infoRow("Bundle Name", bundle?["name"] ?? "-"),
-                  _infoRow("Bundle Price / pax", currency(bundlePrice)),
-                ],
-
-                const SizedBox(height: 12),
-
-                // Fare breakdown
-                _sectionTitle("Fare Summary"),
-                _infoRow("Fare / pax", currency(flightPrice)),
-                _infoRow("Passengers", pax.toString()),
-                if (bundlePrice > 0)
-                  _infoRow("Bundle Total", currency(bundlePrice * pax)),
-                if (addOnsTotal > 0)
-                  _infoRow("Add-ons Total", currency(addOnsTotal)),
-                if ((promoCode ?? "").isNotEmpty)
-                  _infoRow("Promo ($promoCode)", "-${currency(discount)}"),
-                const Divider(),
-                _infoRow("SUBTOTAL", currency(subtotal), emphasize: true),
-                _infoRow("TOTAL", currency(computedTotal), emphasize: true),
-
-                const SizedBox(height: 12),
-
-                // Payment & contact
-                _sectionTitle("Payment & Contact"),
-                _infoRow(
-                  "Payment Method",
-                  paymentMethod ?? billing?['method'] ?? "-",
-                ),
-                if (billing?['cardLast4'] != null)
-                  _infoRow("Card", "**** ${billing!['cardLast4']}"),
-                _infoRow(
-                  "Payment Status",
-                  paymentSuccessful == true
-                      ? "Successful"
-                      : (paymentSuccessful == false ? "Failed" : "Pending"),
-                ),
-                if (contact != null) ...[
-                  _infoRow("Contact Email", contact?['email'] ?? "-"),
-                  _infoRow("Contact Phone", contact?['phone'] ?? "-"),
-                ],
-
-                const SizedBox(height: 12),
-
-                // Issued tickets / PNRs
-                if ((issuedTickets ?? []).isNotEmpty) ...[
-                  _sectionTitle("Issued Tickets"),
-                  ...issuedTickets!.map((t) {
-                    final idx = t["passengerIndex"] ?? 0;
-                    final name = idx < _guests.length
-                        ? "${_guests[idx]['firstName'] ?? ''} ${_guests[idx]['lastName'] ?? ''}"
-                              .trim()
-                        : "Passenger ${idx + 1}";
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _infoRow("Passenger", name),
-                        _infoRow("Ticket No.", t["ticketNo"] ?? "-"),
-                        _infoRow("PNR", t["pnr"] ?? "-"),
-                        const SizedBox(height: 6),
-                      ],
-                    );
-                  }).toList(),
-                ],
-
-                const SizedBox(height: 18),
-
-                // Actions
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text("Download Receipt"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E3A8A),
-                        ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Download not implemented.'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.share),
-                        label: const Text("Share"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade200,
-                          foregroundColor: Colors.black,
-                        ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Share not implemented.'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        child: const Text("View Itinerary"),
-                        onPressed: () {
-                          // navigate to itinerary or pop with result; placeholder:
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Itinerary view not implemented.'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        child: const Text("Done"),
-                        onPressed: () => Navigator.popUntil(
-                          context,
-                          (route) => route.isFirst,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),

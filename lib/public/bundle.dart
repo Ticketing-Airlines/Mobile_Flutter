@@ -21,7 +21,8 @@ class FlightBundlesPage extends StatefulWidget {
 }
 
 class _FlightBundlesPageState extends State<FlightBundlesPage> {
-  double? _perPassengerPrice;
+  double? _selectedTotalPrice;
+  String? _selectedClass;
 
   final List<Map<String, dynamic>> bundles = [
     {
@@ -64,12 +65,17 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Read forwarded per-passenger price (book -> search -> bundle) once
+    // Read forwarded per-passenger price and travel class (book -> search -> bundle) once
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map && _perPassengerPrice == null) {
-      final raw = args['selectedPrice'];
-      if (raw is double) _perPassengerPrice = raw;
-      if (raw is int) _perPassengerPrice = raw.toDouble();
+    if (args is Map) {
+      if (_selectedTotalPrice == null) {
+        final raw = args['selectedPrice'];
+        if (raw is double) _selectedTotalPrice = raw;
+        if (raw is int) _selectedTotalPrice = raw.toDouble();
+      }
+      if (_selectedClass == null && args['selectedClass'] != null) {
+        _selectedClass = args['selectedClass'] as String;
+      }
     }
 
     return Scaffold(
@@ -203,9 +209,20 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         onPressed: () {
+                                          final travelerCount =
+                                              widget.adults +
+                                              widget.children +
+                                              widget.infants;
+                                          final safeTravelerCount =
+                                              travelerCount > 0
+                                              ? travelerCount
+                                              : 1;
+                                          final defaultTotalPrice =
+                                              widget.flight.price *
+                                              safeTravelerCount;
                                           final double forwardedPrice =
-                                              _perPassengerPrice ??
-                                              widget.flight.price;
+                                              _selectedTotalPrice ??
+                                              defaultTotalPrice;
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -221,6 +238,8 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
                                                 arguments: {
                                                   'selectedPrice':
                                                       forwardedPrice,
+                                                  'selectedClass':
+                                                      _selectedClass,
                                                 },
                                               ),
                                             ),

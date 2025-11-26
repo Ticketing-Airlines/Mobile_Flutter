@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/booking_confirmation.dart';
+import 'package:ticketing_flutter/services/flight.dart';
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -34,12 +35,45 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    // optional total passed via Navigator (RouteSettings.arguments: {'total': double})
+    // Get all booking data passed from booking summary
     final args = ModalRoute.of(context)?.settings.arguments;
     final double? total = (args is Map && args['total'] is num)
         ? (args['total'] as num).toDouble()
         : null;
     final totalLabel = total != null ? "PHP ${total.toStringAsFixed(2)}" : "--";
+
+    // Extract booking data for confirmation page
+    final Flight? flight = (args is Map && args['flight'] is Flight)
+        ? args['flight'] as Flight
+        : null;
+    final Map<String, dynamic>? bundle = (args is Map && args['bundle'] is Map)
+        ? Map<String, dynamic>.from(args['bundle'] as Map)
+        : null;
+    final List<Map<String, dynamic>>? guests =
+        (args is Map && args['guests'] is List)
+        ? (args['guests'] as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList()
+        : null;
+    final List<String>? seatAssignments =
+        (args is Map && args['seatAssignments'] is List)
+        ? List<String>.from(args['seatAssignments'] as List)
+        : null;
+    final double? selectedPrice = (args is Map && args['selectedPrice'] is num)
+        ? (args['selectedPrice'] as num).toDouble()
+        : null;
+    final String? travelClass = (args is Map && args['travelClass'] is String)
+        ? args['travelClass'] as String
+        : null;
+    final int? adults = (args is Map && args['adults'] is int)
+        ? args['adults'] as int
+        : null;
+    final int? children = (args is Map && args['children'] is int)
+        ? args['children'] as int
+        : null;
+    final int? infants = (args is Map && args['infants'] is int)
+        ? args['infants'] as int
+        : null;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -202,7 +236,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             (_method == 'card' && !_isCardValid))
                         ? null
                         : () async {
-                            // Show a short “Done booking…” dialog
+                            // Show a short "Processing payment…" dialog
                             await showDialog(
                               context: context,
                               barrierDismissible: false,
@@ -211,36 +245,70 @@ class _PaymentPageState extends State<PaymentPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                title: const Text(
-                                  "Done booking!",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                content: const Text(
-                                  "Your payment has been processed successfully.",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: const Text(
-                                      "OK",
-                                      style: TextStyle(
-                                        color: Colors.blueAccent,
-                                      ),
+                                content: const Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      "Processing payment...",
+                                      style: TextStyle(color: Colors.white70),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
 
-                            // After the dialog is dismissed, go back to Home
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const BookingConfirmationPage(),
-                              ),
-                              (route) => false,
-                            );
+                            // Simulate payment processing
+                            await Future.delayed(const Duration(seconds: 1));
+                            Navigator.pop(context); // Close loading dialog
+
+                            // Navigate to confirmation page if all data is available
+                            if (flight != null &&
+                                bundle != null &&
+                                guests != null &&
+                                seatAssignments != null &&
+                                selectedPrice != null &&
+                                travelClass != null &&
+                                adults != null &&
+                                children != null &&
+                                infants != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => BookingConfirmationPage(
+                                        flight: flight,
+                                        bundle: bundle,
+                                        guests: guests,
+                                        seatAssignments: seatAssignments,
+                                        selectedPrice: selectedPrice,
+                                        travelClass: travelClass,
+                                        adults: adults,
+                                        children: children,
+                                        infants: infants,
+                                        paymentMethod: _method == 'cash'
+                                            ? 'Cash'
+                                            : _method == 'maya'
+                                            ? 'Maya'
+                                            : 'Debit/Credit Card',
+                                      ),
+                                  transitionDuration: Duration.zero,
+                                  reverseTransitionDuration: Duration.zero,
+                                ),
+                              );
+                            } else {
+                              // Fallback if data is missing
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (_) => const Home()),
+                                (route) => false,
+                              );
+                            }
                           },
                     child: Text(
                       _method == null

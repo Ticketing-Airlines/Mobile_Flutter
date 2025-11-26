@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/services/user_service.dart';
+import 'package:ticketing_flutter/auth/login.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,6 +20,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -182,20 +185,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 10),
 
                 // Password input
-                _buildTextField(
+                _buildPasswordField(
                   controller: passwordController,
                   label: "Create Password",
-                  icon: Icons.lock,
-                  obscureText: true,
+                  isVisible: _isPasswordVisible,
+                  onToggleVisibility: () =>
+                      setState(() => _isPasswordVisible = !_isPasswordVisible),
                 ),
                 const SizedBox(height: 10),
 
                 // Confirm Password input
-                _buildTextField(
+                _buildPasswordField(
                   controller: confirmPasswordController,
                   label: "Confirm Password",
-                  icon: Icons.lock,
-                  obscureText: true,
+                  isVisible: _isConfirmPasswordVisible,
+                  onToggleVisibility: () => setState(
+                    () =>
+                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible,
+                  ),
                 ),
                 const SizedBox(height: 10),
 
@@ -280,6 +287,39 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       keyboardType: keyboardType,
       obscureText: obscureText,
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required bool isVisible,
+    required VoidCallback onToggleVisibility,
+  }) {
+    return TextField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: const Icon(Icons.lock, color: Colors.white),
+        suffixIcon: IconButton(
+          onPressed: onToggleVisibility,
+          icon: Icon(
+            isVisible ? Icons.visibility_off : Icons.visibility,
+            color: Colors.white70,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white70),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.blueAccent),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      obscureText: !isVisible,
     );
   }
 
@@ -381,6 +421,11 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.of(context)
         ..pop() // Close the dialog
         ..pop(); // Go back to login page
+      // Or navigate to login page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
     }
   }
 }

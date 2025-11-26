@@ -18,7 +18,7 @@ class BookingSummaryPage extends StatelessWidget {
     required this.guests,
     double? selectedPrice,
     String? selectedClass,
-  }) : travelClass = selectedClass ?? 'Economy',
+  }) : travelClass = selectedClass ?? 'Economy', // Only default if not provided
        selectedPrice = selectedPrice ?? flight.price,
        seatAssignments = _generateSeats(guests.length);
 
@@ -47,7 +47,8 @@ class BookingSummaryPage extends StatelessWidget {
   int get travelerCount => guests.length;
   double get bundlePerGuest => (bundle["price"] ?? 0).toDouble();
 
-  double get totalFlight => selectedPrice * travelerCount;
+  // selectedPrice is already the total flight fare from booking page
+  double get totalFlight => selectedPrice;
   double get totalBundle => bundlePerGuest * travelerCount;
   double get grandTotal => totalFlight + totalBundle;
 
@@ -170,15 +171,6 @@ class BookingSummaryPage extends StatelessWidget {
   // Flight card (re‑styled)
   // ------------------------------------------------------------
   Widget _flightCard() {
-    String? firstAdult;
-    for (final g in guests) {
-      if (g["type"] == "Adult") {
-        firstAdult = "${g["title"] ?? ""} ${g["firstName"]} ${g["lastName"]}"
-            .trim();
-        break;
-      }
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -200,8 +192,6 @@ class BookingSummaryPage extends StatelessWidget {
         _detail(Icons.schedule, "Departure", flight.time),
         _detail(Icons.event_seat, "Class", travelClass),
         const SizedBox(height: 15),
-        if (firstAdult != null) _infoRow("Passenger", firstAdult),
-        const SizedBox(height: 12),
         _infoRow("Bundle", bundle["name"]),
         const SizedBox(height: 15),
         const Text(
@@ -266,7 +256,7 @@ class BookingSummaryPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15),
-        _fareRow("Flight Fare (${travelerCount} pax)", currency(totalFlight)),
+        _fareRow("Flight Fare", currency(totalFlight)),
         _fareRow(
           "${bundle["name"]} (${travelerCount} pax)",
           bundlePerGuest == 0 ? "Included" : currency(totalBundle),
@@ -315,12 +305,39 @@ class BookingSummaryPage extends StatelessWidget {
               shadowColor: Colors.black38,
             ),
             onPressed: () {
+              // Calculate passenger counts from guests
+              int adultsCount = 0;
+              int childrenCount = 0;
+              int infantsCount = 0;
+              for (var guest in guests) {
+                final type = guest["type"]?.toString().toLowerCase() ?? "";
+                if (type == "adult")
+                  adultsCount++;
+                else if (type == "child")
+                  childrenCount++;
+                else if (type == "infant")
+                  infantsCount++;
+              }
+
               Navigator.push(
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
                       const PaymentPage(),
-                  settings: RouteSettings(arguments: {'total': grandTotal}),
+                  settings: RouteSettings(
+                    arguments: {
+                      'total': grandTotal,
+                      'flight': flight,
+                      'bundle': bundle,
+                      'guests': guests,
+                      'seatAssignments': seatAssignments,
+                      'selectedPrice': selectedPrice,
+                      'travelClass': travelClass,
+                      'adults': adultsCount,
+                      'children': childrenCount,
+                      'infants': infantsCount,
+                    },
+                  ),
                   transitionDuration: Duration.zero,
                   reverseTransitionDuration: Duration.zero,
                 ),
