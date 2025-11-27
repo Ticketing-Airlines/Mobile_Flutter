@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_flutter/auth/register.dart';
+import 'package:ticketing_flutter/services/user_service.dart';
+import 'package:ticketing_flutter/public/home.dart';
 //import 'package:ticketing_flutter/admin/admin_dashboard.dart';
 
 class LoginPage extends StatefulWidget {
@@ -98,13 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () {
-                      String email = emailController.text;
-                      String password = passwordController.text;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Login with $email")),
-                      );
-                    },
+                    onPressed: () => _loginUser(),
                     child: const Text(
                       "Login",
                       style: TextStyle(
@@ -147,6 +143,103 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loginUser() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    // Validation
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorDialog("Please enter both email and password.");
+      return;
+    }
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+
+    try {
+      final userService = UserService();
+      final response = await userService.loginUser(email, password);
+
+      // Close loading indicator
+      if (mounted) Navigator.pop(context);
+
+      if (response != null) {
+        // Login successful
+        if (mounted) {
+          _showSuccessDialog();
+          // Navigate to home page after a short delay
+          await Future.delayed(const Duration(seconds: 1));
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Home()),
+            );
+          }
+        }
+      } else {
+        // Login failed
+        if (mounted) {
+          _showErrorDialog("Invalid email or password. Please try again.");
+        }
+      }
+    } catch (e) {
+      // Close loading indicator if still showing
+      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        _showErrorDialog(
+          "An error occurred. Please check your connection and try again.",
+        );
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111827),
+        title: const Text("Error", style: TextStyle(color: Colors.white)),
+        content: Text(message, style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK", style: TextStyle(color: Colors.blueAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111827),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: const SizedBox(
+          height: 80,
+          child: Center(
+            child: Text(
+              "Login successful!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
             ),
           ),
         ),

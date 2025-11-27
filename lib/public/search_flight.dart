@@ -1,22 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/public/roundtrip_flight.dart';
-import 'package:ticketing_flutter/public/multi_flight.dart';
-import 'package:ticketing_flutter/services/flight_service.dart';
-import 'package:ticketing_flutter/public/guest_details_page.dart';
 import 'package:ticketing_flutter/services/flight.dart';
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/bundle.dart';
+
+final List<Flight> _mockFlights = [
+  Flight(
+    id: 1,
+    flightNumber: "PR123",
+    from: "Philippines - Manila",
+    to: "Philippines - Cebu",
+    airline: "Philippine Airlines",
+    date: "2025-12-20",
+    time: "08:00 AM",
+    price: 125.00,
+    departureTime: DateTime.parse("2025-12-20T08:00:00"),
+    arrivalTime: DateTime.parse("2025-12-20T09:30:00"),
+  ),
+  Flight(
+    id: 2,
+    flightNumber: "5J456",
+    from: "Philippines - Manila",
+    to: "Philippines - Cebu",
+    airline: "Cebu Pacific",
+    date: "2025-12-20",
+    time: "11:30 AM",
+    price: 98.50,
+    departureTime: DateTime.parse("2025-12-20T11:30:00"),
+    arrivalTime: DateTime.parse("2025-12-20T13:00:00"),
+  ),
+  Flight(
+    id: 3,
+    flightNumber: "KE678",
+    from: "Philippines - Cebu",
+    to: "South Korea - Seoul",
+    airline: "Korean Air",
+    date: "2025-10-22",
+    time: "02:00 PM",
+    price: 420.75,
+    departureTime: DateTime.parse("2025-10-22T14:00:00"),
+    arrivalTime: DateTime.parse("2025-10-22T20:05:00"),
+  ),
+  Flight(
+    id: 4,
+    flightNumber: "DL905",
+    from: "Japan - Tokyo",
+    to: "Japan - Osaka",
+    airline: "Delta Airlines",
+    date: "2025-10-29",
+    time: "10:00 PM",
+    price: 180.00,
+    departureTime: DateTime.parse("2025-10-29T22:00:00"),
+    arrivalTime: DateTime.parse("2025-10-29T23:10:00"),
+  ),
+  Flight(
+    id: 5,
+    flightNumber: "SQ908",
+    from: "Singapore - Singapore",
+    to: "Philippines - Manila",
+    airline: "Singapore Airlines",
+    date: "2025-11-05",
+    time: "07:45 AM",
+    price: 310.40,
+    departureTime: DateTime.parse("2025-11-05T07:45:00"),
+    arrivalTime: DateTime.parse("2025-11-05T11:25:00"),
+  ),
+  Flight(
+    id: 6,
+    flightNumber: "QF718",
+    from: "Australia - Sydney",
+    to: "Philippines - Manila",
+    airline: "Qantas",
+    date: "2025-11-05",
+    time: "09:00 AM",
+    price: 512.30,
+    departureTime: DateTime.parse("2025-11-05T09:00:00"),
+    arrivalTime: DateTime.parse("2025-11-05T15:10:00"),
+  ),
+];
 
 class SearchFlightsPage extends StatefulWidget {
   final String from;
   final String to;
   final String departureDate;
+  final int adults;
+  final int children;
+  final int infants;
 
   const SearchFlightsPage({
     super.key,
     required this.from,
     required this.to,
     required this.departureDate,
+    required this.adults,
+    required this.children,
+    required this.infants,
   });
 
   @override
@@ -27,6 +104,8 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   String selectedTripType = "One Way";
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
   late Future<List<Flight>> _flightsFuture;
+  double? _selectedTotalPrice;
+  String _selectedClass = "Economy"; // default travel class
 
   @override
   void initState() {
@@ -35,12 +114,21 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   }
 
   Future<List<Flight>> _loadFlights() async {
-    final flightService = FlightService();
-    return flightService.getFlights(
-      from: widget.from,
-      to: widget.to,
-      departureDate: widget.departureDate,
-    );
+    await Future.delayed(const Duration(milliseconds: 350));
+    return _mockFlights.where((flight) {
+      final fromMatch =
+          flight.from.toLowerCase().contains(widget.from.toLowerCase()) ||
+          widget.from.toLowerCase().contains(flight.from.toLowerCase());
+
+      final toMatch =
+          flight.to.toLowerCase().contains(widget.to.toLowerCase()) ||
+          widget.to.toLowerCase().contains(flight.to.toLowerCase());
+
+      final dateMatch =
+          flight.date.toLowerCase() == widget.departureDate.toLowerCase();
+
+      return fromMatch && toMatch && dateMatch;
+    }).toList();
   }
 
   void _navigateToPage(String tripType) {
@@ -52,6 +140,9 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           from: widget.from,
           to: widget.to,
           departureDate: widget.departureDate,
+          adults: widget.adults,
+          children: widget.children,
+          infants: widget.infants,
         );
         break;
       case "Roundtrip":
@@ -65,6 +156,9 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           from: widget.from,
           to: widget.to,
           departureDate: widget.departureDate,
+          adults: widget.adults,
+          children: widget.children,
+          infants: widget.infants,
         );
     }
 
@@ -76,10 +170,24 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Read arguments passed via RouteSettings.arguments
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      if (_selectedTotalPrice == null) {
+        final raw = args['selectedPrice'];
+        if (raw is double) _selectedTotalPrice = raw;
+        if (raw is int) _selectedTotalPrice = raw.toDouble();
+      }
+      if (args['selectedClass'] != null) {
+        _selectedClass = args['selectedClass'] as String;
+      }
+    }
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header: Available Flights + Trip Type
           Padding(
             padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
             child: Row(
@@ -121,7 +229,10 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+
+          // Travel Class Selector
+
+          // Flight List
           Expanded(
             child: FutureBuilder<List<Flight>>(
               future: _flightsFuture,
@@ -141,32 +252,48 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                     final flight = flights[index];
                     return Card(
                       margin: const EdgeInsets.all(10),
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.flight_takeoff,
-                          color: Colors.blue,
-                        ),
-                        title: Text("${flight.from} → ${flight.to}"),
-                        subtitle: Text(
-                          "${flight.airline}\nDate: ${flight.date}  Time: ${flight.time}",
-                        ),
-                        trailing: Text(
-                          "₱${flight.price}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                        isThreeLine: true,
+                      child: InkWell(
+                        splashColor: const Color.fromARGB(
+                          255,
+                          20,
+                          92,
+                          151,
+                        ).withAlpha(80),
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  FlightBundlesPage(flight: flight),
+                            PageRouteBuilder(
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      FlightBundlesPage(
+                                        flight: flight,
+                                        adults: widget.adults,
+                                        children: widget.children,
+                                        infants: widget.infants,
+                                      ),
+                              settings: RouteSettings(
+                                arguments: {
+                                  'selectedPrice': _selectedTotalPrice,
+                                  'selectedClass': _selectedClass,
+                                },
+                              ),
                             ),
                           );
                         },
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.flight_takeoff,
+                            color: Colors.blue,
+                          ),
+                          title: Text("${flight.from} →\n${flight.to}"),
+                          subtitle: Text(
+                            "Flight ${flight.flightNumber} · ${flight.airline}\n"
+                            "Date: ${flight.date}  Time: ${flight.time}",
+                          ),
+                          isThreeLine: true,
+                        ),
                       ),
                     );
                   },
