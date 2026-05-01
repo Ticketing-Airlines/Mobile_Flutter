@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ticketing_flutter/public/home.dart';
+import 'package:ticketing_flutter/services/api_client.dart';
 import 'package:ticketing_flutter/user/user_booking_confirmation.dart';
 import 'package:ticketing_flutter/services/flight.dart';
+import 'package:ticketing_flutter/services/user_booking_record_service.dart';
 import 'dart:convert';
 
 class UserPaymentPage extends StatefulWidget {
@@ -11,7 +12,7 @@ class UserPaymentPage extends StatefulWidget {
   @override
   State<UserPaymentPage> createState() => _UserPaymentPageState();
 }
-
+  
 class _UserPaymentPageState extends State<UserPaymentPage> {
   String? _method; // 'cash' | 'maya' | 'card'
   final _cardName = TextEditingController();
@@ -35,6 +36,14 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
         _cardCvv.text.trim().length >= 3;
   }
 
+  Future<String> _bookingHistoryKeyForCurrentUser() async {
+    final userId = await ApiClient().getUserId();
+    if (userId != null) {
+      return 'user_booking_history_$userId';
+    }
+    return 'user_booking_history';
+  }
+
   Future<void> _saveBookingHistory({
     required Flight flight,
     required Map<String, dynamic> bundle,
@@ -49,12 +58,16 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
     required double total,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    const key = 'user_booking_history';
+    final key = await _bookingHistoryKeyForCurrentUser();
     final raw = prefs.getString(key);
-    final List<dynamic> existing = raw == null ? [] : jsonDecode(raw) as List<dynamic>;
+    final List<dynamic> existing = raw == null
+        ? []
+        : jsonDecode(raw) as List<dynamic>;
 
     final bookingEntry = <String, dynamic>{
-      'bookingRef': DateTime.now().millisecondsSinceEpoch.toString().substring(7),
+      'bookingRef': DateTime.now().millisecondsSinceEpoch.toString().substring(
+        7,
+      ),
       'airline': flight.airline,
       'flightNumber': flight.flightNumber,
       'from': flight.from,
@@ -76,6 +89,9 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
 
     existing.insert(0, bookingEntry);
     await prefs.setString(key, jsonEncode(existing));
+
+    // Persist same snapshot to SQL Server when logged in with a valid session.
+    await UserBookingRecordService().createFromLocalEntry(bookingEntry);
   }
 
   @override
@@ -119,6 +135,16 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
     final int? infants = (args is Map && args['infants'] is int)
         ? args['infants'] as int
         : null;
+    final hasBookingData =
+        flight != null &&
+        bundle != null &&
+        guests != null &&
+        seatAssignments != null &&
+        selectedPrice != null &&
+        travelClass != null &&
+        adults != null &&
+        children != null &&
+        infants != null;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -137,15 +163,28 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  "Payment",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      tooltip: 'Back',
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.maybePop(context),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "Payment",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
                 ),
                 const SizedBox(height: 20),
 
@@ -278,12 +317,24 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
                     ),
                     onPressed:
                         (_method == null ||
-                            (_method == 'card' && !_isCardValid))
+                            (_method == 'card' && !_isCardValid) ||
+                            !hasBookingData)
                         ? null
                         : () async {
-                            // Show a short "Processing payment…" dialog
-                            await showDialog(
+                            // `showDialog` defaults to the root navigator. Calling
+                            // `Navigator.pop(context)` after the delay used the
+                            // nearest navigator, which could pop this route instead
+                            // of the dialog—so the payment page disappeared and
+                            // `pushReplacement` never ran (user landed on summary).
+                            if (!mounted) return;
+                            final navigator = Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            );
+
+                            showDialog<void>(
                               context: context,
+                              useRootNavigator: true,
                               barrierDismissible: false,
                               builder: (ctx) => AlertDialog(
                                 backgroundColor: const Color(0xFF111827),
@@ -304,74 +355,61 @@ class _UserPaymentPageState extends State<UserPaymentPage> {
                               ),
                             );
 
-                            // Simulate payment processing
-                            await Future.delayed(const Duration(seconds: 1));
-                            Navigator.pop(context); // Close loading dialog
+                            // Cash: show spinner longer before confirmation (Maya/card stay quick).
+                            final processingDelay = _method == 'cash'
+                                ? const Duration(seconds: 5)
+                                : const Duration(seconds: 1);
+                            await Future.delayed(processingDelay);
+                            if (!mounted) return;
+                            navigator.pop();
 
-                            // Navigate to confirmation page if all data is available
-                            if (flight != null &&
-                                bundle != null &&
-                                guests != null &&
-                                seatAssignments != null &&
-                                selectedPrice != null &&
-                                travelClass != null &&
-                                adults != null &&
-                                children != null &&
-                                infants != null) {
-                              final methodLabel = _method == 'cash'
-                                  ? 'Cash'
-                                  : _method == 'maya'
-                                  ? 'Maya'
-                                  : 'Debit/Credit Card';
-                              final totalAmount = total ??
-                                  (selectedPrice +
-                                      (((bundle['price'] ?? 0) as num).toDouble() *
-                                          guests.length));
-                              await _saveBookingHistory(
-                                flight: flight,
-                                bundle: bundle,
-                                guests: guests,
-                                seatAssignments: seatAssignments,
-                                selectedPrice: selectedPrice,
-                                travelClass: travelClass,
-                                adults: adults,
-                                children: children,
-                                infants: infants,
-                                paymentMethod: methodLabel,
-                                total: totalAmount,
-                              );
-                              Navigator.pushReplacement(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder:
-                                      (
-                                        context,
-                                        animation,
-                                        secondaryAnimation,
-                                      ) => UserBookingConfirmationPage(
-                                        flight: flight,
-                                        bundle: bundle,
-                                        guests: guests,
-                                        seatAssignments: seatAssignments,
-                                        selectedPrice: selectedPrice,
-                                        travelClass: travelClass,
-                                        adults: adults,
-                                        children: children,
-                                        infants: infants,
-                                        paymentMethod: methodLabel,
-                                      ),
-                                  transitionDuration: Duration.zero,
-                                  reverseTransitionDuration: Duration.zero,
-                                ),
-                              );
-                            } else {
-                              // Fallback if data is missing
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (_) => const Home()),
-                                (route) => false,
-                              );
-                            }
+                            if (!mounted) return;
+
+                            final methodLabel = _method == 'cash'
+                                ? 'Cash'
+                                : _method == 'maya'
+                                ? 'Maya'
+                                : 'Debit/Credit Card';
+                            final totalAmount =
+                                total ??
+                                (selectedPrice +
+                                    (((bundle['price'] ?? 0) as num)
+                                            .toDouble() *
+                                        guests.length));
+                            await _saveBookingHistory(
+                              flight: flight,
+                              bundle: bundle,
+                              guests: guests,
+                              seatAssignments: seatAssignments,
+                              selectedPrice: selectedPrice,
+                              travelClass: travelClass,
+                              adults: adults,
+                              children: children,
+                              infants: infants,
+                              paymentMethod: methodLabel,
+                              total: totalAmount,
+                            );
+                            if (!mounted) return;
+                            await navigator.pushReplacement(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        UserBookingConfirmationPage(
+                                          flight: flight,
+                                          bundle: bundle,
+                                          guests: guests,
+                                          seatAssignments: seatAssignments,
+                                          selectedPrice: selectedPrice,
+                                          travelClass: travelClass,
+                                          adults: adults,
+                                          children: children,
+                                          infants: infants,
+                                          paymentMethod: methodLabel,
+                                        ),
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            );
                           },
                     child: Text(
                       _method == null

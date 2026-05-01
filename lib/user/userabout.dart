@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/public/bookpage.dart';
-import 'package:ticketing_flutter/public/book.dart';
-import 'package:ticketing_flutter/public/explore.dart';
+import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
+import 'package:ticketing_flutter/user/user_bookpage.dart';
+import 'package:ticketing_flutter/user/user_book.dart';
+import 'package:ticketing_flutter/user/user_explore.dart';
 import 'package:ticketing_flutter/user/user_travel_info.dart';
 import 'package:ticketing_flutter/user/user_manage/user_manage.dart';
 import 'package:ticketing_flutter/user/account_details.dart';
+import 'package:ticketing_flutter/user/user_logout.dart';
 
 class Userabout extends StatefulWidget {
   const Userabout({super.key});
@@ -51,7 +53,7 @@ class _Userabout extends State<Userabout> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DisableRoutePop(child: Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
@@ -87,7 +89,7 @@ class _Userabout extends State<Userabout> {
               _drawerItem(
                 icon: Icons.flight,
                 label: 'Book',
-                onTap: () => _navReplace(const FlightBookingApp()),
+                onTap: () => _navReplace(const UserBookPage()),
               ),
               _drawerItem(
                 icon: Icons.manage_accounts,
@@ -102,7 +104,7 @@ class _Userabout extends State<Userabout> {
               _drawerItem(
                 icon: Icons.explore,
                 label: 'Explore',
-                onTap: () => _nav(const ExplorePage()),
+                onTap: () => _nav(const UserExplore()),
               ),
               _drawerItem(
                 icon: Icons.home,
@@ -113,6 +115,11 @@ class _Userabout extends State<Userabout> {
                 icon: Icons.login,
                 label: 'My Account',
                 onTap: () => _nav(const UserAccountDetailsPage()),
+              ),
+              _drawerItem(
+                icon: Icons.logout,
+                label: 'Logout',
+                onTap: () => logoutUserAndShowLogin(context),
               ),
             ],
           ),
@@ -218,7 +225,7 @@ class _Userabout extends State<Userabout> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const Book(),
+                                  builder: (context) => const UserBook(),
                                 ),
                               );
                             },
@@ -312,6 +319,7 @@ class _Userabout extends State<Userabout> {
           ),
         ),
       ),
+    ),
     );
   }
 

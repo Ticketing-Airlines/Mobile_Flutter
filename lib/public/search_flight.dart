@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
 import 'package:ticketing_flutter/services/flight.dart';
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/bundle.dart';
@@ -34,7 +35,7 @@ final List<Flight> _mockFlights = [
     from: "Philippines - Cebu",
     to: "South Korea - Seoul",
     airline: "Korean Air",
-    date: "2025-10-22",
+    date: "2026-10-22",
     time: "02:00 PM",
     price: 420.75,
     departureTime: DateTime.parse("2025-10-22T14:00:00"),
@@ -113,9 +114,17 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
     _flightsFuture = _loadFlights();
   }
 
+  String _normalizeDate(String value) {
+    final parsed = DateTime.tryParse(value.trim());
+    if (parsed == null) return value.trim().toLowerCase();
+    final month = parsed.month.toString().padLeft(2, '0');
+    final day = parsed.day.toString().padLeft(2, '0');
+    return '${parsed.year}-$month-$day';
+  }
+
   Future<List<Flight>> _loadFlights() async {
     await Future.delayed(const Duration(milliseconds: 350));
-    return _mockFlights.where((flight) {
+    final routeMatches = _mockFlights.where((flight) {
       final fromMatch =
           flight.from.toLowerCase().contains(widget.from.toLowerCase()) ||
           widget.from.toLowerCase().contains(flight.from.toLowerCase());
@@ -124,11 +133,16 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           flight.to.toLowerCase().contains(widget.to.toLowerCase()) ||
           widget.to.toLowerCase().contains(flight.to.toLowerCase());
 
-      final dateMatch =
-          flight.date.toLowerCase() == widget.departureDate.toLowerCase();
-
-      return fromMatch && toMatch && dateMatch;
+      return fromMatch && toMatch;
     }).toList();
+
+    final targetDate = _normalizeDate(widget.departureDate);
+    final dateMatches = routeMatches
+        .where((flight) => _normalizeDate(flight.date) == targetDate)
+        .toList();
+
+    // If no exact date match exists, still show same-route options.
+    return dateMatches.isNotEmpty ? dateMatches : routeMatches;
   }
 
   void _navigateToPage(String tripType) {
@@ -183,7 +197,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
       }
     }
 
-    return Scaffold(
+    return DisableRoutePop(child: Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -303,6 +317,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           ),
         ],
       ),
+    ),
     );
   }
 }

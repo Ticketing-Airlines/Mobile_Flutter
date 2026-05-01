@@ -113,9 +113,17 @@ class _SearchFlightsPageState extends State<UsersearchFlight> {
     _flightsFuture = _loadFlights();
   }
 
+  String _normalizeDate(String value) {
+    final parsed = DateTime.tryParse(value.trim());
+    if (parsed == null) return value.trim().toLowerCase();
+    final month = parsed.month.toString().padLeft(2, '0');
+    final day = parsed.day.toString().padLeft(2, '0');
+    return '${parsed.year}-$month-$day';
+  }
+
   Future<List<Flight>> _loadFlights() async {
     await Future.delayed(const Duration(milliseconds: 350));
-    return _mockFlights.where((flight) {
+    final routeMatches = _mockFlights.where((flight) {
       final fromMatch =
           flight.from.toLowerCase().contains(widget.from.toLowerCase()) ||
           widget.from.toLowerCase().contains(flight.from.toLowerCase());
@@ -124,11 +132,16 @@ class _SearchFlightsPageState extends State<UsersearchFlight> {
           flight.to.toLowerCase().contains(widget.to.toLowerCase()) ||
           widget.to.toLowerCase().contains(flight.to.toLowerCase());
 
-      final dateMatch =
-          flight.date.toLowerCase() == widget.departureDate.toLowerCase();
-
-      return fromMatch && toMatch && dateMatch;
+      return fromMatch && toMatch;
     }).toList();
+
+    final targetDate = _normalizeDate(widget.departureDate);
+    final dateMatches = routeMatches
+        .where((flight) => _normalizeDate(flight.date) == targetDate)
+        .toList();
+
+    // If no exact date match exists, still show same-route options.
+    return dateMatches.isNotEmpty ? dateMatches : routeMatches;
   }
 
   void _navigateToPage(String tripType) {
@@ -187,44 +200,62 @@ class _SearchFlightsPageState extends State<UsersearchFlight> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Available Flights + Trip Type
+          // Header: back, title, trip type
           Padding(
-            padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+            padding: const EdgeInsets.only(top: 36, left: 4, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Available Flights",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "Choose your option",
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ],
+                IconButton(
+                  tooltip: 'Back',
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.maybePop(context),
                 ),
-                DropdownButton<String>(
-                  value: selectedTripType,
-                  underline: Container(),
-                  items: tripTypes.map((String type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedTripType = newValue!;
-                    });
-                    _navigateToPage(newValue!);
-                  },
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Available Flights",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Choose your option",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      DropdownButton<String>(
+                        value: selectedTripType,
+                        underline: Container(),
+                        items: tripTypes.map((String type) {
+                          return DropdownMenuItem<String>(
+                            value: type,
+                            child: Text(type),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedTripType = newValue!;
+                          });
+                          _navigateToPage(newValue!);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

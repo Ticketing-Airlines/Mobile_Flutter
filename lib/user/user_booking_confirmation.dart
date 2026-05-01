@@ -26,7 +26,6 @@ class UserBookingConfirmationPage extends BookingConfirmationPage {
          children: children,
          infants: infants,
          paymentMethod: paymentMethod,
-         accountCtaLabel: "Back to Your Account",
          accountCtaPageBuilder: (context) => const UserAccountDetailsPage(),
        );
 }

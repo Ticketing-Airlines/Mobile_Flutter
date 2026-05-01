@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/public/bookpage.dart';
-import 'package:ticketing_flutter/public/about.dart';
-import 'package:ticketing_flutter/public/explore.dart';
-import 'package:ticketing_flutter/public/travel_info.dart';
-import 'package:ticketing_flutter/auth/login.dart';
+import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
+import 'package:ticketing_flutter/user/userabout.dart';
+import 'package:ticketing_flutter/user/user_explore.dart';
+import 'package:ticketing_flutter/user/user_travel_info.dart';
+import 'package:ticketing_flutter/user/account_details.dart';
+import 'package:ticketing_flutter/user/user_bookpage.dart';
+import 'package:ticketing_flutter/user/user_logout.dart';
 
 class UserManagePage extends StatefulWidget {
   const UserManagePage({super.key});
@@ -44,66 +46,6 @@ class _UserManagePageState extends State<UserManagePage> {
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => page,
         transitionDuration: Duration.zero,
-      ),
-    );
-  }
-
-  void _showCheckInContent() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text(
-          'Check-In',
-          style: TextStyle(color: Colors.amberAccent),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter your booking details to check in:',
-              style: TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Booking Reference',
-                labelStyle: const TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[800],
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Last Name',
-                labelStyle: const TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[800],
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amberAccent,
-              foregroundColor: Colors.black,
-            ),
-            child: const Text('Check-In'),
-          ),
-        ],
       ),
     );
   }
@@ -345,7 +287,7 @@ class _UserManagePageState extends State<UserManagePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DisableRoutePop(child: Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -380,7 +322,7 @@ class _UserManagePageState extends State<UserManagePage> {
               _drawerItem(
                 icon: Icons.flight,
                 label: 'Book',
-                onTap: () => _navReplace(const FlightBookingApp()),
+                onTap: () => _navReplace(const UserFlightBookingApp()),
               ),
               _drawerItem(
                 icon: Icons.manage_accounts,
@@ -390,22 +332,27 @@ class _UserManagePageState extends State<UserManagePage> {
               _drawerItem(
                 icon: Icons.info,
                 label: 'Travel Info',
-                onTap: () => _nav(const TravelInfoPage()),
+                onTap: () => _nav(const UserTravelInfoPage()),
               ),
               _drawerItem(
                 icon: Icons.explore,
                 label: 'Explore',
-                onTap: () => _nav(const ExplorePage()),
+                onTap: () => _nav(const UserExplore()),
               ),
               _drawerItem(
                 icon: Icons.home,
                 label: 'About',
-                onTap: () => _nav(const About()),
+                onTap: () => _nav(const Userabout()),
               ),
               _drawerItem(
-                icon: Icons.login,
-                label: 'Login',
-                onTap: () => _nav(const LoginPage()),
+                icon: Icons.account_circle,
+                label: 'My Account',
+                onTap: () => _nav(const UserAccountDetailsPage()),
+              ),
+              _drawerItem(
+                icon: Icons.logout,
+                label: 'Logout',
+                onTap: () => logoutUserAndShowLogin(context),
               ),
             ],
           ),
@@ -443,30 +390,21 @@ class _UserManagePageState extends State<UserManagePage> {
               ),
               const SizedBox(height: 10),
               const Text(
-                "Check in, manage bookings, and more — all in one place.",
+                "Manage bookings and check flight status — all in one place.",
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
 
               const SizedBox(height: 30),
 
-              // Main options (3 cards)
+              // Main options (Manage Booking + Flight Status)
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final cardWidth = (constraints.maxWidth - 28) / 3;
+                  final cardWidth = (constraints.maxWidth - 14) / 2;
                   return IntrinsicHeight(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SizedBox(
-                          width: cardWidth,
-                          child: UserManageMainCard(
-                            icon: Icons.login_rounded,
-                            title: "Check-In",
-                            color: Colors.amberAccent,
-                            onTap: _showCheckInContent,
-                          ),
-                        ),
                         SizedBox(
                           width: cardWidth,
                           child: UserManageMainCard(
@@ -562,6 +500,7 @@ class _UserManagePageState extends State<UserManagePage> {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -602,7 +541,6 @@ class _UserManageMainCardState extends State<UserManageMainCard> {
         transform: Matrix4.identity()..scale(scale),
         curve: Curves.easeOut,
         width: double.infinity,
-        height: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.06),
           borderRadius: BorderRadius.circular(18),
@@ -674,7 +612,6 @@ class _UserManageSubCardState extends State<UserManageSubCard> {
         transform: Matrix4.identity()..scale(scale),
         curve: Curves.easeOut,
         width: double.infinity,
-        height: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(18),
