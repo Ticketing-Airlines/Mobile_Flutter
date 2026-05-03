@@ -213,428 +213,447 @@ class _BookOneway extends State<BookOneway> {
 
   @override
   Widget build(BuildContext context) {
-    return DisableRoutePop(child: Scaffold(
-      resizeToAvoidBottomInset: false,
-      drawer: Drawer(
-        width: 300.0,
-        backgroundColor: const Color(0xFF111827),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const DrawerHeader(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF111827),
-                      Color(0xFF1E3A8A),
-                    ],
-                  ),
-                ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.flight, color: Colors.white),
-              title: const Text('Book', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FlightBookingApp(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.manage_accounts, color: Colors.white),
-              title: const Text(
-                'Manage',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ManagePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info, color: Colors.white),
-              title: const Text(
-                'Travel Info',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TravelInfoPage(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.explore, color: Colors.white),
-              title: const Text(
-                'Explore',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ExplorePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home, color: Colors.white),
-              title: const Text('About', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const About()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.login, color: Colors.white),
-              title: const Text('Login', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final screenHeight = constraints.maxHeight;
-          final boxHeight = 500.0;
-          final boxWidth = 330.0;
-          final boxTop = (screenHeight / 2) - (boxHeight / 2);
-          final screenWidth = MediaQuery.of(context).size.width;
-          final boxLeft = (screenWidth - boxWidth) / 2;
-
-          return Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF000000),
-                            Color(0xFF111827),
-                            Color(0xFF1E3A8A),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      color: Colors.blue.shade100,
-                      width: double.infinity,
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                top: 30,
-                left: 10,
-                child: Builder(
-                  builder: (context) {
-                    return IconButton(
-                      icon: const Icon(
-                        Icons.menu,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                top: boxTop,
-                left: boxLeft,
-                child: Container(
-                  width: boxWidth,
-                  height: boxHeight,
+    return DisableRoutePop(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        drawer: Drawer(
+          width: 300.0,
+          backgroundColor: const Color(0xFF111827),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const DrawerHeader(
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF000000),
+                        Color(0xFF111827),
+                        Color(0xFF1E3A8A),
+                      ],
+                    ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            buildClickableBox("One-way", false),
-                            buildClickableBox("Roundtrip", true),
-                            buildClickableBox("Multi-City", true),
-                          ],
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.flight, color: Colors.white),
+                title: const Text(
+                  'Book',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FlightBookingApp(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.manage_accounts, color: Colors.white),
+                title: const Text(
+                  'Manage',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ManagePage()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info, color: Colors.white),
+                title: const Text(
+                  'Travel Info',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TravelInfoPage(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.explore, color: Colors.white),
+                title: const Text(
+                  'Explore',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ExplorePage(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.home, color: Colors.white),
+                title: const Text(
+                  'About',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const About()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.login, color: Colors.white),
+                title: const Text(
+                  'Login',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenHeight = constraints.maxHeight;
+            final boxHeight = 500.0;
+            final boxWidth = 330.0;
+            final boxTop = (screenHeight / 2) - (boxHeight / 2);
+            final screenWidth = MediaQuery.of(context).size.width;
+            final boxLeft = (screenWidth - boxWidth) / 2;
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF000000),
+                              Color(0xFF111827),
+                              Color(0xFF1E3A8A),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 20),
-                        Column(
-                          children: [
-                            buildAutocompleteField("From", box4Controller),
-                            const SizedBox(height: 12),
-                            buildAutocompleteField("To", box5Controller),
-                            const SizedBox(height: 12),
-                            buildDatePickerField("Departure", box6Controller),
-                          ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        color: Colors.blue.shade100,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: 30,
+                  left: 10,
+                  child: Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(
+                          Icons.menu,
+                          color: Colors.white,
+                          size: 30,
                         ),
-                        const SizedBox(height: 12),
-                        Column(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    buildInputBox(
-                                      "Passengers",
-                                      box7Controller,
-                                      width: 140,
-                                      readOnly: true,
-                                    ),
-                                    buildInputBox(
-                                      "Class",
-                                      box8Controller,
-                                      width: 140,
-                                      readOnly: true,
-                                    ),
-                                  ],
-                                ),
-                                // 🔹 Show total price only if the user has selected passengers
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 6,
-                                    left: 8,
-                                  ),
-                                  child: Text(
-                                    'Total Price: ₱$_selectedPrice',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1E3A8A),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // 🔹 Show total price only after passengers are selected
-                          ],
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: boxTop,
+                  left: boxLeft,
+                  child: Container(
+                    width: boxWidth,
+                    height: boxHeight,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
                         ),
-
-                        const SizedBox(height: 15),
-                        // 🔹 Updated Search Button
-                        GestureDetector(
-                          onTapDown: (_) {
-                            setState(() => _isSearchPressed = true);
-                          },
-                          onTapUp: (_) {
-                            setState(() => _isSearchPressed = false);
-
-                            // Validation: Check if all required fields are filled
-                            if (box4Controller.text.isEmpty ||
-                                box5Controller.text.isEmpty ||
-                                box6Controller.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please fill in all required fields',
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              buildClickableBox("One-way", false),
+                              buildClickableBox("Roundtrip", true),
+                              buildClickableBox("Multi-City", true),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Column(
+                            children: [
+                              buildAutocompleteField("From", box4Controller),
+                              const SizedBox(height: 12),
+                              buildAutocompleteField("To", box5Controller),
+                              const SizedBox(height: 12),
+                              buildDatePickerField("Departure", box6Controller),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Column(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      buildInputBox(
+                                        "Passengers",
+                                        box7Controller,
+                                        width: 140,
+                                        readOnly: true,
+                                      ),
+                                      buildInputBox(
+                                        "Class",
+                                        box8Controller,
+                                        width: 140,
+                                        readOnly: true,
+                                      ),
+                                    ],
                                   ),
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                              return;
-                            }
-
-                            // Validate that both country and city are selected for From/To fields
-                            bool isFromValid = box4Controller.text.contains(
-                              " - ",
-                            );
-                            bool isToValid = box5Controller.text.contains(
-                              " - ",
-                            );
-
-                            if (!isFromValid || !isToValid) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please select a city'),
-                                  backgroundColor: Colors.red,
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                              return;
-                            }
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchFlightsPage(
-                                  from: box4Controller.text,
-                                  to: box5Controller.text,
-                                  departureDate: box6Controller.text,
-                                  adults: _adults,
-                                  children: _children,
-                                  infants: _infants,
-                                ),
+                                  // 🔹 Show total price only if the user has selected passengers
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 6,
+                                      left: 8,
+                                    ),
+                                    child: Text(
+                                      'Total Price: ₱$_selectedPrice',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E3A8A),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                          onTapCancel: () {
-                            setState(() => _isSearchPressed = false);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: double.infinity, // w-full
-                            height: 56, // h-14
-                            decoration: BoxDecoration(
-                              color: _isSearchPressed
-                                  ? const Color.fromARGB(
-                                      255,
-                                      53,
-                                      56,
-                                      58,
-                                    ) // Slightly darker when pressed
-                                  : const Color.fromARGB(
-                                      255,
-                                      5,
-                                      23,
-                                      37,
-                                    ), // Same as lower drawer half
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Search Flights',
-                                  style: TextStyle(
-                                    color: Colors
-                                        .white, // Black text for visibility
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+
+                              // 🔹 Show total price only after passengers are selected
+                            ],
+                          ),
+
+                          const SizedBox(height: 15),
+                          // 🔹 Updated Search Button
+                          GestureDetector(
+                            onTapDown: (_) {
+                              setState(() => _isSearchPressed = true);
+                            },
+                            onTapUp: (_) {
+                              setState(() => _isSearchPressed = false);
+
+                              // Validation: Check if all required fields are filled
+                              if (box4Controller.text.isEmpty ||
+                                  box5Controller.text.isEmpty ||
+                                  box6Controller.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please fill in all required fields',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Validate that both country and city are selected for From/To fields
+                              bool isFromValid = box4Controller.text.contains(
+                                " - ",
+                              );
+                              bool isToValid = box5Controller.text.contains(
+                                " - ",
+                              );
+
+                              if (!isFromValid || !isToValid) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please select a city'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SearchFlightsPage(
+                                    from: box4Controller.text,
+                                    to: box5Controller.text,
+                                    departureDate: box6Controller.text,
+                                    adults: _adults,
+                                    children: _children,
+                                    infants: _infants,
+                                  ),
+                                  settings: RouteSettings(
+                                    arguments: {
+                                      'selectedPrice': _selectedPrice
+                                          .toDouble(),
+                                      'selectedClass': _selectedClass,
+                                    },
                                   ),
                                 ),
-                              ],
+                              );
+                            },
+                            onTapCancel: () {
+                              setState(() => _isSearchPressed = false);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: double.infinity, // w-full
+                              height: 56, // h-14
+                              decoration: BoxDecoration(
+                                color: _isSearchPressed
+                                    ? const Color.fromARGB(
+                                        255,
+                                        53,
+                                        56,
+                                        58,
+                                      ) // Slightly darker when pressed
+                                    : const Color.fromARGB(
+                                        255,
+                                        5,
+                                        23,
+                                        37,
+                                      ), // Same as lower drawer half
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Search Flights',
+                                    style: TextStyle(
+                                      color: Colors
+                                          .white, // Black text for visibility
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: boxTop - 45, // 40 pixels above the box
+                  left: boxLeft,
+                  child: SizedBox(
+                    width: boxWidth,
+                    child: Center(
+                      child: Text(
+                        'Where do you want to fly?',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 129, 150, 207),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 49, // adjust as you like
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.copyright,
+                          size: 20,
+                          color: Color.fromARGB(179, 7, 7, 7),
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          '2025 Airlines Ticketing. All Rights Reserved',
+                          style: TextStyle(
+                            color: Color.fromARGB(179, 26, 25, 25),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: boxTop - 45, // 40 pixels above the box
-                left: boxLeft,
-                child: SizedBox(
-                  width: boxWidth,
-                  child: Center(
-                    child: Text(
-                      'Where do you want to fly?',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 129, 150, 207),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 49, // adjust as you like
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(
-                        Icons.copyright,
-                        size: 20,
-                        color: Color.fromARGB(179, 7, 7, 7),
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        '2025 Airlines Ticketing. All Rights Reserved',
-                        style: TextStyle(
-                          color: Color.fromARGB(179, 26, 25, 25),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
-              // BELOW the main white box
-            ],
-          );
-        },
+                // BELOW the main white box
+              ],
+            );
+          },
+        ),
       ),
-    ),
     );
   }
 
@@ -642,173 +661,83 @@ class _BookOneway extends State<BookOneway> {
     return Container(
       width: 300,
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: RawAutocomplete<String>(
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          String input = textEditingValue.text.toLowerCase();
-          List<String> options = [];
-
-          // Check if the input is a country name (exact match)
-          bool isExactCountry = countries1.contains(textEditingValue.text);
-          if (isExactCountry) {
-            // User has selected a country, show cities for that country
-            String countryName = textEditingValue.text;
-            if (countryCities.containsKey(countryName)) {
-              List<String> cities = countryCities[countryName]!;
-              for (String city in cities) {
-                options.add(city); // Just show city names, not "Country - City"
-              }
-
-              // Exclude the option selected in the other field
-              if (controller == box4Controller &&
-                  box5Controller.text.isNotEmpty) {
-                options = options
-                    .where((c) => c != box5Controller.text)
-                    .toList();
-              } else if (controller == box5Controller &&
-                  box4Controller.text.isNotEmpty) {
-                options = options
-                    .where((c) => c != box4Controller.text)
-                    .toList();
-              }
-
-              return options;
-            }
-          }
-
-          // If input is empty or not an exact country match, show countries
-          List<String> countryOptions = List<String>.from(countries1);
-
-          // Exclude the option selected in the other field
-          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
-            countryOptions = countryOptions
-                .where((c) => c != box5Controller.text)
-                .toList();
-          } else if (controller == box5Controller &&
-              box4Controller.text.isNotEmpty) {
-            countryOptions = countryOptions
-                .where((c) => c != box4Controller.text)
-                .toList();
-          }
-
-          return countryOptions;
-        },
-        fieldViewBuilder:
-            (context, textEditingController, focusNode, onFieldSubmitted) {
-              // Update the controller when this widget is first built
-              if (controller.text.isNotEmpty) {
-                textEditingController.text = controller.text;
-              }
-
-              return TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  border: InputBorder.none,
-                ),
-                onTap: () {
-                  // This will force the options to show immediately when field is tapped
-                  textEditingController.selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: textEditingController.text.length,
-                  );
-                  // Trigger the options to show by simulating a change
-                  focusNode.requestFocus();
-                },
-                onChanged: (value) {
-                  controller.text = value;
-                },
-              );
-            },
-        optionsViewBuilder: (context, onSelected, options) {
-          return Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4.0,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 200,
-                  maxWidth: 300,
-                ),
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  itemCount: options.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final String option = options.elementAt(index);
-                    return InkWell(
-                      onTap: () {
-                        if (countryCities.containsKey(option)) {
-                          // If it's a country, show its cities in the dropdown
-                          setState(() {
-                            // Replace the current text with the selected country
-                            controller.text = option;
-                          });
-
-                          // Update the autocomplete field’s options to that country's cities
-                          Future.delayed(const Duration(milliseconds: 100), () {
-                            FocusScope.of(context).requestFocus(
-                              FocusNode(),
-                            ); // close current dropdown
-                            Future.delayed(
-                              const Duration(milliseconds: 100),
-                              () {
-                                // reopen autocomplete with city options
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return SimpleDialog(
-                                      title: Text("Select City in $option"),
-                                      children: countryCities[option]!.map((
-                                        city,
-                                      ) {
-                                        return SimpleDialogOption(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            setState(() {
-                                              controller.text =
-                                                  "$option - $city";
-                                            });
-                                          },
-                                          child: Text(city),
-                                        );
-                                      }).toList(),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          });
-                        } else {
-                          // If it's already a city, just select it
-                          onSelected(option);
-                          controller.text = option;
-                        }
-                      },
-
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(option),
-                      ),
-                    );
-                  },
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => _showCountryCityPicker(controller),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? hint : controller.text,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
                 ),
               ),
             ),
-          );
-        },
-        onSelected: (String selection) {
-          controller.text = selection;
-          setState(() {}); // Refresh the other field's options
-        },
+            const Icon(Icons.arrow_drop_down, color: Colors.black54),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _showCountryCityPicker(TextEditingController controller) async {
+    final selectedCountry = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ListView(
+            children: countries1
+                .map(
+                  (country) => ListTile(
+                    title: Text(country),
+                    onTap: () => Navigator.pop(sheetContext, country),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedCountry == null) return;
+
+    final cities = countryCities[selectedCountry] ?? const <String>[];
+    final selectedCity = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ListView(
+            children: cities
+                .map(
+                  (city) => ListTile(
+                    title: Text(city),
+                    onTap: () => Navigator.pop(sheetContext, city),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedCity == null) return;
+
+    final cityPart = selectedCity.startsWith("$selectedCountry - ")
+        ? selectedCity.substring("$selectedCountry - ".length)
+        : selectedCity;
+
+    setState(() {
+      controller.text = "$selectedCountry - $cityPart";
+    });
   }
 
   Widget buildAutocompleteField2(

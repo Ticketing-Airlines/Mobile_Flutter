@@ -1,83 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
 import 'package:ticketing_flutter/services/flight.dart';
+import 'package:ticketing_flutter/services/search_flight.dart' as search_data;
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/bundle.dart';
-
-final List<Flight> _mockFlights = [
-  Flight(
-    id: 1,
-    flightNumber: "PR123",
-    from: "Philippines - Manila",
-    to: "Philippines - Cebu",
-    airline: "Philippine Airlines",
-    date: "2026-12-20",
-    time: "08:00 AM",
-    price: 125.00,
-    departureTime: DateTime.parse("2025-12-20T08:00:00"),
-    arrivalTime: DateTime.parse("2025-12-20T09:30:00"),
-  ),
-  Flight(
-    id: 2,
-    flightNumber: "5J456",
-    from: "Philippines - Manila",
-    to: "Philippines - Cebu",
-    airline: "Cebu Pacific",
-    date: "2025-12-20",
-    time: "11:30 AM",
-    price: 98.50,
-    departureTime: DateTime.parse("2025-12-20T11:30:00"),
-    arrivalTime: DateTime.parse("2025-12-20T13:00:00"),
-  ),
-  Flight(
-    id: 3,
-    flightNumber: "KE678",
-    from: "Philippines - Cebu",
-    to: "South Korea - Seoul",
-    airline: "Korean Air",
-    date: "2026-10-22",
-    time: "02:00 PM",
-    price: 420.75,
-    departureTime: DateTime.parse("2025-10-22T14:00:00"),
-    arrivalTime: DateTime.parse("2025-10-22T20:05:00"),
-  ),
-  Flight(
-    id: 4,
-    flightNumber: "DL905",
-    from: "Japan - Tokyo",
-    to: "Japan - Osaka",
-    airline: "Delta Airlines",
-    date: "2025-10-29",
-    time: "10:00 PM",
-    price: 180.00,
-    departureTime: DateTime.parse("2025-10-29T22:00:00"),
-    arrivalTime: DateTime.parse("2025-10-29T23:10:00"),
-  ),
-  Flight(
-    id: 5,
-    flightNumber: "SQ908",
-    from: "Singapore - Singapore",
-    to: "Philippines - Manila",
-    airline: "Singapore Airlines",
-    date: "2025-11-05",
-    time: "07:45 AM",
-    price: 310.40,
-    departureTime: DateTime.parse("2025-11-05T07:45:00"),
-    arrivalTime: DateTime.parse("2025-11-05T11:25:00"),
-  ),
-  Flight(
-    id: 6,
-    flightNumber: "QF718",
-    from: "Australia - Sydney",
-    to: "Philippines - Manila",
-    airline: "Qantas",
-    date: "2025-11-05",
-    time: "09:00 AM",
-    price: 512.30,
-    departureTime: DateTime.parse("2025-11-05T09:00:00"),
-    arrivalTime: DateTime.parse("2025-11-05T15:10:00"),
-  ),
-];
 
 class SearchFlightsPage extends StatefulWidget {
   final String from;
@@ -124,7 +49,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
 
   Future<List<Flight>> _loadFlights() async {
     await Future.delayed(const Duration(milliseconds: 350));
-    final routeMatches = _mockFlights.where((flight) {
+    final routeMatches = search_data.sharedMockFlights.where((flight) {
       final fromMatch =
           flight.from.toLowerCase().contains(widget.from.toLowerCase()) ||
           widget.from.toLowerCase().contains(flight.from.toLowerCase());
@@ -141,8 +66,8 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
         .where((flight) => _normalizeDate(flight.date) == targetDate)
         .toList();
 
-    // If no exact date match exists, still show same-route options.
-    return dateMatches.isNotEmpty ? dateMatches : routeMatches;
+    // Only show flights that match both route and selected date exactly.
+    return dateMatches;
   }
 
   void _navigateToPage(String tripType) {
@@ -182,6 +107,102 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
     );
   }
 
+  Widget _buildTripTypePicker() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
+      ),
+      child: DropdownButton<String>(
+        value: selectedTripType,
+        underline: const SizedBox.shrink(),
+        iconEnabledColor: const Color(0xFF1E3A8A),
+        items: tripTypes.map((String type) {
+          return DropdownMenuItem<String>(value: type, child: Text(type));
+        }).toList(),
+        onChanged: (String? newValue) {
+          if (newValue == null) return;
+          setState(() => selectedTripType = newValue);
+          _navigateToPage(newValue);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFlightCard(Flight flight) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        splashColor: const Color(0xFFBFDBFE),
+        onTap: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  FlightBundlesPage(
+                    flight: flight,
+                    adults: widget.adults,
+                    children: widget.children,
+                    infants: widget.infants,
+                  ),
+              settings: RouteSettings(
+                arguments: {
+                  'selectedPrice': _selectedTotalPrice,
+                  'selectedClass': _selectedClass,
+                },
+              ),
+            ),
+          );
+        },
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 6,
+          ),
+          leading: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFDBEAFE),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: const Icon(Icons.flight_takeoff, color: Color(0xFF1E3A8A)),
+          ),
+          title: Text(
+            "${flight.from} -> ${flight.to}",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          subtitle: Text(
+            "Flight ${flight.flightNumber} · ${flight.airline}\n"
+            "Date: ${flight.date}  Time: ${flight.time}",
+            style: const TextStyle(color: Color(0xFF475569)),
+          ),
+          isThreeLine: true,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read arguments passed via RouteSettings.arguments
@@ -197,54 +218,59 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
       }
     }
 
-    return DisableRoutePop(child: Scaffold(
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0F172A),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFF1E3A8A),
+        leading: IconButton(
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header: Available Flights + Trip Type
-          Padding(
-            padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
+              ),
+              borderRadius: BorderRadius.circular(14),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       "Available Flights",
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
                       "Choose your option",
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
                     ),
                   ],
                 ),
-                DropdownButton<String>(
-                  value: selectedTripType,
-                  underline: Container(),
-                  items: tripTypes.map((String type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedTripType = newValue!;
-                    });
-                    _navigateToPage(newValue!);
-                  },
-                ),
+                _buildTripTypePicker(),
               ],
             ),
           ),
-
-          // Travel Class Selector
 
           // Flight List
           Expanded(
@@ -264,52 +290,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                   itemCount: flights.length,
                   itemBuilder: (context, index) {
                     final flight = flights[index];
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: InkWell(
-                        splashColor: const Color.fromARGB(
-                          255,
-                          20,
-                          92,
-                          151,
-                        ).withAlpha(80),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              transitionDuration: Duration.zero,
-                              reverseTransitionDuration: Duration.zero,
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      FlightBundlesPage(
-                                        flight: flight,
-                                        adults: widget.adults,
-                                        children: widget.children,
-                                        infants: widget.infants,
-                                      ),
-                              settings: RouteSettings(
-                                arguments: {
-                                  'selectedPrice': _selectedTotalPrice,
-                                  'selectedClass': _selectedClass,
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                        child: ListTile(
-                          leading: const Icon(
-                            Icons.flight_takeoff,
-                            color: Colors.blue,
-                          ),
-                          title: Text("${flight.from} →\n${flight.to}"),
-                          subtitle: Text(
-                            "Flight ${flight.flightNumber} · ${flight.airline}\n"
-                            "Date: ${flight.date}  Time: ${flight.time}",
-                          ),
-                          isThreeLine: true,
-                        ),
-                      ),
-                    );
+                    return _buildFlightCard(flight);
                   },
                 );
               },
@@ -317,7 +298,6 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
           ),
         ],
       ),
-    ),
     );
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
 import 'package:ticketing_flutter/services/flight.dart';
 import 'guest_details_page.dart';
-import 'user_booking_details.dart';
 import 'package:ticketing_flutter/services/user_service.dart';
 
 class FlightBundlesPage extends StatefulWidget {
@@ -81,7 +79,7 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
       }
     }
 
-    return DisableRoutePop(child: Scaffold(
+    return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -115,19 +113,42 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🌟 Header
-                  const Text(
-                    "Choose Your Bundle",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Select the best option for your trip",
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                  // 🌟 Header + back
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        tooltip: 'Back',
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.maybePop(context),
+                      ),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Choose Your Bundle",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Select the best option for your trip",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   // 🧩 Bundles — scrollable and closer to header
@@ -297,7 +318,6 @@ class _FlightBundlesPageState extends State<FlightBundlesPage> {
           ),
         ],
       ),
-    ),
     );
   }
 }

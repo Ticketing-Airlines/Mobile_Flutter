@@ -699,172 +699,83 @@ class _UserBookState extends State<UserBook> {
     return Container(
       width: 300,
       height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: RawAutocomplete<String>(
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          List<String> options = [];
-
-          // Check if the input is a country name (exact match)
-          bool isExactCountry = countries1.contains(textEditingValue.text);
-          if (isExactCountry) {
-            // User has selected a country, show cities for that country
-            String countryName = textEditingValue.text;
-            if (countryCities.containsKey(countryName)) {
-              List<String> cities = countryCities[countryName]!;
-              for (String city in cities) {
-                options.add(city); // Just show city names, not "Country - City"
-              }
-
-              // Exclude the option selected in the other field
-              if (controller == box4Controller &&
-                  box5Controller.text.isNotEmpty) {
-                options = options
-                    .where((c) => c != box5Controller.text)
-                    .toList();
-              } else if (controller == box5Controller &&
-                  box4Controller.text.isNotEmpty) {
-                options = options
-                    .where((c) => c != box4Controller.text)
-                    .toList();
-              }
-
-              return options;
-            }
-          }
-
-          // If input is empty or not an exact country match, show countries
-          List<String> countryOptions = List<String>.from(countries1);
-
-          // Exclude the option selected in the other field
-          if (controller == box4Controller && box5Controller.text.isNotEmpty) {
-            countryOptions = countryOptions
-                .where((c) => c != box5Controller.text)
-                .toList();
-          } else if (controller == box5Controller &&
-              box4Controller.text.isNotEmpty) {
-            countryOptions = countryOptions
-                .where((c) => c != box4Controller.text)
-                .toList();
-          }
-
-          return countryOptions;
-        },
-        fieldViewBuilder:
-            (context, textEditingController, focusNode, onFieldSubmitted) {
-              // Update the controller when this widget is first built
-              if (controller.text.isNotEmpty) {
-                textEditingController.text = controller.text;
-              }
-
-              return TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  border: InputBorder.none,
-                ),
-                onTap: () {
-                  // This will force the options to show immediately when field is tapped
-                  textEditingController.selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: textEditingController.text.length,
-                  );
-                  // Trigger the options to show by simulating a change
-                  focusNode.requestFocus();
-                },
-                onChanged: (value) {
-                  controller.text = value;
-                },
-              );
-            },
-        optionsViewBuilder: (context, onSelected, options) {
-          return Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4.0,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 200,
-                  maxWidth: 300,
-                ),
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  itemCount: options.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final String option = options.elementAt(index);
-                    return InkWell(
-                      onTap: () {
-                        if (countryCities.containsKey(option)) {
-                          // If it's a country, show its cities in the dropdown
-                          setState(() {
-                            // Replace the current text with the selected country
-                            controller.text = option;
-                          });
-
-                          // Update the autocomplete field’s options to that country's cities
-                          Future.delayed(const Duration(milliseconds: 100), () {
-                            FocusScope.of(context).requestFocus(
-                              FocusNode(),
-                            ); // close current dropdown
-                            Future.delayed(
-                              const Duration(milliseconds: 100),
-                              () {
-                                // reopen autocomplete with city options
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return SimpleDialog(
-                                      title: Text("Select City in $option"),
-                                      children: countryCities[option]!.map((
-                                        city,
-                                      ) {
-                                        return SimpleDialogOption(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            setState(() {
-                                              controller.text =
-                                                  "$option - $city";
-                                            });
-                                          },
-                                          child: Text(city),
-                                        );
-                                      }).toList(),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          });
-                        } else {
-                          // If it's already a city, just select it
-                          onSelected(option);
-                          controller.text = option;
-                        }
-                      },
-
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(option),
-                      ),
-                    );
-                  },
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => _showCountryCityPicker(controller),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? hint : controller.text,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
                 ),
               ),
             ),
-          );
-        },
-        onSelected: (String selection) {
-          controller.text = selection;
-          setState(() {}); // Refresh the other field's options
-        },
+            const Icon(Icons.arrow_drop_down, color: Colors.black54),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _showCountryCityPicker(TextEditingController controller) async {
+    final selectedCountry = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ListView(
+            children: countries1
+                .map(
+                  (country) => ListTile(
+                    title: Text(country),
+                    onTap: () => Navigator.pop(sheetContext, country),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedCountry == null) return;
+
+    final cities = countryCities[selectedCountry] ?? const <String>[];
+    final selectedCity = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ListView(
+            children: cities
+                .map(
+                  (city) => ListTile(
+                    title: Text(city),
+                    onTap: () => Navigator.pop(sheetContext, city),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || selectedCity == null) return;
+
+    final cityPart = selectedCity.startsWith("$selectedCountry - ")
+        ? selectedCity.substring("$selectedCountry - ".length)
+        : selectedCity;
+
+    setState(() {
+      controller.text = "$selectedCountry - $cityPart";
+    });
   }
 
   Widget buildAutocompleteField2(
