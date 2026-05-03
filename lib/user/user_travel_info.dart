@@ -52,121 +52,122 @@ class _UserTravelInfoPageState extends State<UserTravelInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DisableRoutePop(child: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        drawer: Drawer(
-          width: 300,
-          backgroundColor: const Color(0xFF111827),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF000000),
-                      Color(0xFF111827),
-                      Color(0xFF1E3A8A),
-                    ],
-                  ),
-                ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ),
-              _drawerItem(
-                icon: Icons.flight,
-                label: 'Book',
-                onTap: () => _navReplace(const UserBookPage()),
-              ),
-              _drawerItem(
-                icon: Icons.manage_accounts,
-                label: 'Manage',
-                onTap: () => _nav(const UserManagePage()),
-              ),
-              _drawerItem(
-                icon: Icons.info,
-                label: 'Travel Info',
-                onTap: () => _navReplace(const UserTravelInfoPage()),
-              ),
-              _drawerItem(
-                icon: Icons.explore,
-                label: 'Explore',
-                onTap: () => _nav(const UserExplore()),
-              ),
-              _drawerItem(
-                icon: Icons.home,
-                label: 'About',
-                onTap: () => _nav(const Userabout()),
-              ),
-              _drawerItem(
-                icon: Icons.account_circle,
-                label: 'My Account',
-                onTap: () => _nav(const UserAccountDetailsPage()),
-              ),
-              _drawerItem(
-                icon: Icons.logout,
-                label: 'Logout',
-                onTap: () => logoutUserAndShowLogin(context),
-              ),
-            ],
+    return DisableRoutePop(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF000000), Color(0xFF111827), Color(0xFF1E3A8A)],
           ),
         ),
-        appBar: AppBar(
+        child: Scaffold(
           backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text(
-                  'Travel Information',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          drawer: Drawer(
+            width: 300,
+            backgroundColor: const Color(0xFF111827),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                const DrawerHeader(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF000000),
+                        Color(0xFF111827),
+                        Color(0xFF1E3A8A),
+                      ],
+                    ),
+                  ),
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Your complete guide for flights, policies, and travel reminders.',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                _drawerItem(
+                  icon: Icons.flight,
+                  label: 'Book',
+                  onTap: () => _navReplace(const UserBookPage()),
                 ),
-                const SizedBox(height: 25),
-                _buildCheckInSection(),
-                _buildBaggageSection(),
-                _buildBookingSection(),
-                _buildPaymentSection(),
-                _buildTravelAdvisoriesSection(),
-                _buildAirplanePoliciesSection(),
-                const SizedBox(height: 40),
-                _buildFooter(),
+                _drawerItem(
+                  icon: Icons.manage_accounts,
+                  label: 'Manage',
+                  onTap: () => _nav(const UserManagePage()),
+                ),
+                _drawerItem(
+                  icon: Icons.info,
+                  label: 'Travel Info',
+                  onTap: () => _navReplace(const UserTravelInfoPage()),
+                ),
+                _drawerItem(
+                  icon: Icons.explore,
+                  label: 'Explore',
+                  onTap: () => _nav(const UserExplore()),
+                ),
+                _drawerItem(
+                  icon: Icons.home,
+                  label: 'About',
+                  onTap: () => _nav(const Userabout()),
+                ),
+                _drawerItem(
+                  icon: Icons.account_circle,
+                  label: 'My Account',
+                  onTap: () => _nav(const UserAccountDetailsPage()),
+                ),
+                _drawerItem(
+                  icon: Icons.logout,
+                  label: 'Logout',
+                  onTap: () => logoutUserAndShowLogin(context),
+                ),
               ],
             ),
           ),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    'Travel Information',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Your complete guide for flights, policies, and travel reminders.',
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                  const SizedBox(height: 25),
+                  _buildCheckInSection(),
+                  _buildBaggageSection(),
+                  _buildBookingSection(),
+                  _buildPaymentSection(),
+                  _buildTravelAdvisoriesSection(),
+                  _buildAirplanePoliciesSection(),
+                  const SizedBox(height: 40),
+                  _buildFooter(),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -335,7 +336,7 @@ class _UserTravelInfoPageState extends State<UserTravelInfoPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '© 2025 CEB Travel Solutions. All rights reserved.',
+            '© 2025 Airlines Ticketing. All rights reserved.',
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 12,

@@ -82,6 +82,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   final _formKey = GlobalKey<FormState>();
   late final List<_PassengerDescriptor> _passengers;
   late final List<_FormModel> _forms;
+  late final List<GlobalKey<FormFieldState<DateTime?>>> _dobFieldKeys;
   bool _isPrivatePolicyChecked = false;
   double? _selectedPrice;
   String? _selectedClass;
@@ -91,6 +92,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     super.initState();
     _passengers = _buildPassengers();
     _forms = List.generate(_passengers.length, (_) => _FormModel());
+    _dobFieldKeys = List.generate(
+      _passengers.length,
+      (_) => GlobalKey<FormFieldState<DateTime?>>(),
+    );
     _prefillFromCurrentUser();
   }
 
@@ -237,21 +242,26 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     );
   }
 
-  Future<void> _pickDob(int index) async {
+  Future<void> _pickDob(
+    int index,
+    FormFieldState<DateTime?> field,
+  ) async {
+    final form = _forms[index];
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(1995),
+      initialDate: form.dob ?? DateTime(1995),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
     if (picked != null) {
       setState(() {
-        final form = _forms[index];
         form.dob = picked;
-        form.age = _calculateAge(picked); // ← compute age
-        form.ageController.text =
-            form.age?.toString() ?? ""; // ← update controller so UI refreshes
+        form.age = _calculateAge(picked);
+        form.ageController.text = form.age?.toString() ?? '';
       });
+      field.didChange(picked);
+      // Show/clear inline error only after user picks a date (not on first paint).
+      field.validate();
     }
   }
 
@@ -263,6 +273,30 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       age--;
     }
     return age;
+  }
+
+  String? _validateDobForPassenger(
+    _PassengerDescriptor passenger,
+    DateTime? dob,
+  ) {
+    if (dob == null) {
+      return "Please select date of birth";
+    }
+    final age = _calculateAge(dob);
+    switch (passenger.type) {
+      case _PassengerType.child:
+        if (age < 2 || age > 11) {
+          return "Age must be between 2 and 11 years";
+        }
+        return null;
+      case _PassengerType.infant:
+        if (age >= 2) {
+          return "Age must be under 2 years";
+        }
+        return null;
+      case _PassengerType.adult:
+        return null;
+    }
   }
 
   @override
@@ -485,17 +519,28 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
             },
           ),
           const SizedBox(height: 16),
-          InkWell(
-            onTap: isFirstAdult ? null : () => _pickDob(index),
-            child: InputDecorator(
-              decoration: buildInputDecoration("Date of Birth"),
-              child: Text(
-                form.dob == null
-                    ? "Select Date"
-                    : "${form.dob!.day}/${form.dob!.month}/${form.dob!.year}",
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
+          FormField<DateTime?>(
+            key: _dobFieldKeys[index],
+            initialValue: form.dob,
+            autovalidateMode: AutovalidateMode.disabled,
+            validator: (_) =>
+                _validateDobForPassenger(passenger, form.dob),
+            builder: (field) {
+              return InkWell(
+                onTap: isFirstAdult ? null : () => _pickDob(index, field),
+                child: InputDecorator(
+                  decoration: buildInputDecoration("Date of Birth").copyWith(
+                    errorText: field.errorText,
+                  ),
+                  child: Text(
+                    form.dob == null
+                        ? "Select Date"
+                        : "${form.dob!.day}/${form.dob!.month}/${form.dob!.year}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -553,20 +598,6 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
 
     if (!_isPrivatePolicyChecked) {
       _showSnackBar("Please agree to the private policy before continuing");
-      return;
-    }
-
-    final missingDobIndex = _forms.indexWhere(
-      (form) => form.dob == null || form.age == null,
-    );
-    if (missingDobIndex != -1) {
-      final passenger = _passengers[missingDobIndex];
-      final isFirstAdult =
-          passenger.type == _PassengerType.adult && passenger.index == 0;
-      final displayTitle = isFirstAdult
-          ? "Your Details (Primary Passenger)"
-          : passenger.displayLabel;
-      _showSnackBar("Please select $displayTitle's date of birth");
       return;
     }
 

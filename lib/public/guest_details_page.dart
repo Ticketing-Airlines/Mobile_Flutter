@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ticketing_flutter/widgets/disable_route_pop.dart';
 import 'package:ticketing_flutter/public/booking_summary.dart';
 import 'package:ticketing_flutter/services/flight.dart';
 import 'package:ticketing_flutter/services/user_service.dart';
@@ -274,8 +273,27 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
       }
     }
 
-    return DisableRoutePop(child: Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFF1E3A8A),
+        leading: IconButton(
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        title: const Text(
+          'Guest Details',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1E3A8A),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -308,15 +326,6 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
                     color: Colors.black87,
                   ),
                   textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Guest Details",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E3A8A),
-                  ),
                 ),
                 const SizedBox(height: 16),
                 ...List.generate(
@@ -364,7 +373,6 @@ class _GuestDetailsPageState extends State<GuestDetailsPage> {
           ),
         ),
       ),
-    ),
     );
   }
 

@@ -4,7 +4,7 @@ import 'package:ticketing_flutter/services/flight.dart';
 import 'package:ticketing_flutter/public/home.dart';
 import 'package:ticketing_flutter/public/bundle.dart';
 
-final List<Flight> _mockFlights = [
+final List<Flight> sharedMockFlights = [
   Flight(
     id: 1,
     flightNumber: "PR123",
@@ -13,7 +13,7 @@ final List<Flight> _mockFlights = [
     airline: "Philippine Airlines",
     date: "2026-12-20",
     time: "08:00 AM",
-    price: 125.00,
+    price: 0,
     departureTime: DateTime.parse("2026-12-20T08:00:00"),
     arrivalTime: DateTime.parse("2026-12-20T09:30:00"),
   ),
@@ -25,7 +25,7 @@ final List<Flight> _mockFlights = [
     airline: "Cebu Pacific",
     date: "2026-12-20",
     time: "11:30 AM",
-    price: 98.50,
+    price: 0,
     departureTime: DateTime.parse("2026-12-20T11:30:00"),
     arrivalTime: DateTime.parse("2026-12-20T13:00:00"),
   ),
@@ -37,7 +37,7 @@ final List<Flight> _mockFlights = [
     airline: "Korean Air",
     date: "2026-10-22",
     time: "02:00 PM",
-    price: 420.75,
+    price: 0,
     departureTime: DateTime.parse("2026-10-22T14:00:00"),
     arrivalTime: DateTime.parse("2026-10-22T20:05:00"),
   ),
@@ -49,7 +49,7 @@ final List<Flight> _mockFlights = [
     airline: "Delta Airlines",
     date: "2026-10-29",
     time: "10:00 PM",
-    price: 180.00,
+    price: 0,
     departureTime: DateTime.parse("2026-10-29T22:00:00"),
     arrivalTime: DateTime.parse("2026-10-29T23:10:00"),
   ),
@@ -61,7 +61,7 @@ final List<Flight> _mockFlights = [
     airline: "Singapore Airlines",
     date: "2026-11-05",
     time: "07:45 AM",
-    price: 310.40,
+    price: 0,
     departureTime: DateTime.parse("2026-11-05T07:45:00"),
     arrivalTime: DateTime.parse("2026-11-05T11:25:00"),
   ),
@@ -73,7 +73,7 @@ final List<Flight> _mockFlights = [
     airline: "Qantas",
     date: "2026-11-05",
     time: "09:00 AM",
-    price: 512.30,
+    price: 0,
     departureTime: DateTime.parse("2026-11-05T09:00:00"),
     arrivalTime: DateTime.parse("2026-11-05T15:10:00"),
   ),
@@ -105,7 +105,6 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   String selectedTripType = "One Way";
   final List<String> tripTypes = ["One Way", "Roundtrip", "Multicity"];
   late Future<List<Flight>> _flightsFuture;
-  double? _selectedTotalPrice;
   String _selectedClass = "Economy"; // default travel class
 
   @override
@@ -124,7 +123,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
 
   Future<List<Flight>> _loadFlights() async {
     await Future.delayed(const Duration(milliseconds: 350));
-    final routeMatches = _mockFlights.where((flight) {
+    final routeMatches = sharedMockFlights.where((flight) {
       final fromMatch =
           flight.from.toLowerCase().contains(widget.from.toLowerCase()) ||
           widget.from.toLowerCase().contains(flight.from.toLowerCase());
@@ -185,16 +184,17 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
   @override
   Widget build(BuildContext context) {
     // Read arguments passed via RouteSettings.arguments
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map) {
-      if (_selectedTotalPrice == null) {
-        final raw = args['selectedPrice'];
-        if (raw is double) _selectedTotalPrice = raw;
-        if (raw is int) _selectedTotalPrice = raw.toDouble();
-      }
-      if (args['selectedClass'] != null) {
-        _selectedClass = args['selectedClass'] as String;
-      }
+    // Travel class (and optional fare from book flow) come from route args — not from this page.
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    String classForBundle = _selectedClass;
+    if (routeArgs is Map && routeArgs['selectedClass'] != null) {
+      classForBundle = routeArgs['selectedClass'] as String;
+      _selectedClass = classForBundle;
+    }
+    final bundleForward = <String, dynamic>{'selectedClass': classForBundle};
+    if (routeArgs is Map) {
+      final sp = routeArgs['selectedPrice'];
+      if (sp is num) bundleForward['selectedPrice'] = sp.toDouble();
     }
 
     return DisableRoutePop(
@@ -289,10 +289,7 @@ class _SearchFlightsPageState extends State<SearchFlightsPage> {
                                           infants: widget.infants,
                                         ),
                                 settings: RouteSettings(
-                                  arguments: {
-                                    'selectedPrice': _selectedTotalPrice,
-                                    'selectedClass': _selectedClass,
-                                  },
+                                  arguments: bundleForward,
                                 ),
                               ),
                             );
